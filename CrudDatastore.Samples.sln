@@ -1,0 +1,35 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrudDatastore.SqlClient", "CrudDatastore.SqlClient\CrudDatastore.SqlClient.csproj", "{7D253990-B4C6-4A38-BD37-8FBA133095D3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrudDatastore.SqlClientORM", "CrudDatastore.SqlClientORM\CrudDatastore.SqlClientORM.csproj", "{81C0FB32-522E-4E5C-A1C8-D645EAD160DA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrudDatastore.MultiDbClientORM", "CrudDatastore.MultiDbClientORM\CrudDatastore.MultiDbClientORM.csproj", "{5E272D5D-F3FC-4505-9BED-A1C8BFB6CD4E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrudDatastore.SqlClientDopper", "CrudDatastore.SqlClientDopper\CrudDatastore.SqlClientDopper.csproj", "{F388F1C4-C9F7-4441-B3C4-A958F0495CFF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|anycpu = Debug|anycpu
+		Release|anycpu = Release|anycpu
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7D253990-B4C6-4A38-BD37-8FBA133095D3}.Debug|anycpu.ActiveCfg = Debug|Any CPU
+		{7D253990-B4C6-4A38-BD37-8FBA133095D3}.Debug|anycpu.Build.0 = Debug|Any CPU
+		{7D253990-B4C6-4A38-BD37-8FBA133095D3}.Release|anycpu.ActiveCfg = Release|Any CPU
+		{7D253990-B4C6-4A38-BD37-8FBA133095D3}.Release|anycpu.Build.0 = Release|Any CPU
+		{81C0FB32-522E-4E5C-A1C8-D645EAD160DA}.Debug|anycpu.ActiveCfg = Debug|Any CPU
+		{81C0FB32-522E-4E5C-A1C8-D645EAD160DA}.Debug|anycpu.Build.0 = Debug|Any CPU
+		{81C0FB32-522E-4E5C-A1C8-D645EAD160DA}.Release|anycpu.ActiveCfg = Release|Any CPU
+		{81C0FB32-522E-4E5C-A1C8-D645EAD160DA}.Release|anycpu.Build.0 = Release|Any CPU
+		{5E272D5D-F3FC-4505-9BED-A1C8BFB6CD4E}.Debug|anycpu.ActiveCfg = Debug|Any CPU
+		{5E272D5D-F3FC-4505-9BED-A1C8BFB6CD4E}.Debug|anycpu.Build.0 = Debug|Any CPU
+		{5E272D5D-F3FC-4505-9BED-A1C8BFB6CD4E}.Release|anycpu.ActiveCfg = Release|Any CPU
+		{5E272D5D-F3FC-4505-9BED-A1C8BFB6CD4E}.Release|anycpu.Build.0 = Release|Any CPU
+		{F388F1C4-C9F7-4441-B3C4-A958F0495CFF}.Debug|anycpu.ActiveCfg = Debug|Any CPU
+		{F388F1C4-C9F7-4441-B3C4-A958F0495CFF}.Debug|anycpu.Build.0 = Debug|Any CPU
+		{F388F1C4-C9F7-4441-B3C4-A958F0495CFF}.Release|anycpu.ActiveCfg = Release|Any CPU
+		{F388F1C4-C9F7-4441-B3C4-A958F0495CFF}.Release|anycpu.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
