@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Transactions;
+using CrudDatastore.Framework;
 using CrudDatastore.MultiDbClientORM.Entities;
 
 namespace CrudDatastore.MultiDbClientORM

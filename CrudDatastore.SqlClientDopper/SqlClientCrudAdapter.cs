@@ -8,6 +8,8 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
+using CrudDatastore;
+using CrudDatastore.Framework;
 
 namespace CrudDatastore.SqlClientDopper
 {

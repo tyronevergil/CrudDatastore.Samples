@@ -4,6 +4,8 @@ using System.Data.Linq.Mapping;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Linq.Expressions;
+using CrudDatastore;
+using CrudDatastore.Framework;
 
 namespace CrudDatastore.SqlClientDopper
 {
@@ -224,20 +226,20 @@ namespace CrudDatastore.SqlClientDopper
                 var transaction = (SqlTransaction)last;
                 parameters = parameters.Where((item, index) => index != parameters.Length - 1).ToArray();
 
-                Execute(connection, new Command(command, parameters), transaction);
+                Execute(connection, new CrudDatastore.Action(command, parameters), transaction);
             }
             else
             {
-                Execute(connection, new Command(command, parameters));
+                Execute(connection, new CrudDatastore.Action(command, parameters));
             }
         }
 
-        public static void Execute(this SqlConnection connection, Command command)
+        public static void Execute(this SqlConnection connection, CrudDatastore.Action command)
         {
             Execute(connection, command, null);
         }
 
-        public static void Execute(this SqlConnection connection, Command command, SqlTransaction transaction)
+        public static void Execute(this SqlConnection connection, CrudDatastore.Action command, SqlTransaction transaction)
         {
             var executor = new CommandExecutor((sql, parameters) =>
             {
@@ -267,7 +269,7 @@ namespace CrudDatastore.SqlClientDopper
                 connection.Open();
             }
 
-            command.SatisfyingFrom(executor);
+            command.SatisfyingActionFrom(executor);
         }
 
         private static string GetTableName<T>()
@@ -328,11 +330,11 @@ namespace CrudDatastore.SqlClientDopper
             return false;
         }
 
-        private class CommandExecutor : IDataCommand
+        private class CommandExecutor : ICommand
         {
-            Action<string, object[]> _executor;
+            private readonly System.Action<string, object[]> _executor;
 
-            public CommandExecutor(Action<string, object[]> executor)
+            public CommandExecutor(System.Action<string, object[]> executor)
             {
                 _executor = executor;
             }
@@ -340,6 +342,12 @@ namespace CrudDatastore.SqlClientDopper
             public void Execute(string command, params object[] parameters)
             {
                 _executor(command, parameters);
+            }
+
+            public System.Threading.Tasks.Task ExecuteAsync(string command, params object[] parameters)
+            {
+                _executor(command, parameters);
+                return System.Threading.Tasks.Task.CompletedTask;
             }
         }
 

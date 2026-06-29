@@ -7,6 +7,8 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
+using CrudDatastore;
+using CrudDatastore.Framework;
 using Oracle.ManagedDataAccess.Client;
 
 namespace CrudDatastore.MultiDbClientORM

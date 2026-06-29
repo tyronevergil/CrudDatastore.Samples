@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using CrudDatastore;
+using CrudDatastore.Framework;
 
 namespace CrudDatastore.MultiDbClientORM
 {

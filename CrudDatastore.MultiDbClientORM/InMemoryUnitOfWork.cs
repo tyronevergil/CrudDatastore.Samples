@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using CrudDatastore;
+using CrudDatastore.Framework;
 using CrudDatastore.MultiDbClientORM.Entities;
 
 namespace CrudDatastore.MultiDbClientORM
@@ -22,8 +24,8 @@ namespace CrudDatastore.MultiDbClientORM
                 new Identification { IdentificationId = 3, PersonId = 2, Type = 1, Number = "425–428-336" },
             };
 
-            var dataStorePerson = new DataStore<Person>(new InMemoryCrudAdapter<Person>(people, p => p.PersonId));
-            var dataStoreIdentification = new DataStore<Identification>(new InMemoryCrudAdapter<Identification>(identifications, p => p.IdentificationId));
+            var dataStorePerson = people.CreateDataStore(p => p.PersonId);
+            var dataStoreIdentification = identifications.CreateDataStore(p => p.IdentificationId);
 
             this.Register(dataStorePerson)
                 .Map(p => p.Identifications, (p, i) => p.PersonId == i.PersonId);

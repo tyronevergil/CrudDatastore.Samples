@@ -5,56 +5,30 @@ using CrudDatastore;
 
 namespace CrudDatastore.SqlClient
 {
-    public class DataContext : DataStoreContextBase
+    public class DataContext : DataContextBase
     {
-        private readonly IDataStoreConfig _dataStoreConfig;
-
-        private DataContext(IDataStoreConfig dataStores)
+        private DataContext(IUnitOfWork unitOfWork)
+            : base(unitOfWork)
         {
-            _dataStoreConfig = dataStores;
-            _dataStoreConfig.RegisterDataStores(this);
         }
 
         public static DataContext Factory()
         {
-            //return new DataContext(new SqlClientDataStoreConfig(<connectionstring>));
-            return new DataContext(new InMemoryDataStoreConfig());
-        }
-
-        public override void Execute(ICommand command)
-        {
-            command.SatisfyingFrom(_dataStoreConfig);
+            //return new DataContext(new SqlClientUnitOfWork(<connectionstring>));
+            return new DataContext(new InMemoryUnitOfWork());
         }
     }
 
-    public static class DataQueryExtention
+    public static class DataContextExtensions
     {
-        public static IQueryable<T> Find<T>(this DataQuery<T> query, Expression<Func<T, bool>> predicate) where T : EntityBase
-        {
-            return query.Find(new Specification<T>(predicate));
-        }
-
-        public static T FindSingle<T>(this DataQuery<T> query, Expression<Func<T, bool>> predicate) where T : EntityBase
-        {
-            return query.FindSingle(new Specification<T>(predicate));
-        }
-    }
-
-    public static class DataQueryContextExtention
-    {
-        public static IQueryable<T> Find<T>(this DataQueryContextBase context, Expression<Func<T, bool>> predicate) where T : EntityBase
+        public static IQueryable<T> Find<T>(this DataContextBase context, Expression<Func<T, bool>> predicate) where T : EntityBase
         {
             return context.Find(new Specification<T>(predicate));
         }
 
-        public static T FindSingle<T>(this DataQueryContextBase context, Expression<Func<T, bool>> predicate) where T : EntityBase
+        public static T FindSingle<T>(this DataContextBase context, Expression<Func<T, bool>> predicate) where T : EntityBase
         {
             return context.FindSingle(new Specification<T>(predicate));
-        }
-
-        public static void Execute(this DataQueryContextBase context, string sql, params object[] parameters)
-        {
-            context.Execute(new Command(sql, parameters));
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data.SqlClient;
+using CrudDatastore.Framework;
 using CrudDatastore.SqlClientORM.Entities;
 
 namespace CrudDatastore.SqlClientORM

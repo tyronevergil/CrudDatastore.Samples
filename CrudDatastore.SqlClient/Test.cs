@@ -21,6 +21,7 @@ namespace CrudDatastore.SqlClient
                 };
 
                 context.Add(person);
+                context.SaveChanges();
 
                 Assert.IsTrue(person.PersonId > 0);
                 Assert.IsTrue(context.Find<Person>(p => p.PersonId == person.PersonId).Count() == 1);
@@ -36,6 +37,7 @@ namespace CrudDatastore.SqlClient
                 person.Firstname = "Rudolf";
 
                 context.Update(person);
+                context.SaveChanges();
 
                 Assert.IsTrue(context.FindSingle<Person>(p => p.PersonId == person.PersonId).Firstname == "Rudolf");
             }
@@ -49,6 +51,7 @@ namespace CrudDatastore.SqlClient
                 var person = context.FindSingle<Person>(p => p.PersonId == 1);
 
                 context.Delete(person);
+                context.SaveChanges();
 
                 Assert.IsTrue(context.Find<Person>(p => p.PersonId == person.PersonId).Count() == 0);
             }

@@ -6,6 +6,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Linq.Expressions;
 using CrudDatastore;
+using CrudDatastore.Framework;
 
 namespace CrudDatastore.SqlClient
 {

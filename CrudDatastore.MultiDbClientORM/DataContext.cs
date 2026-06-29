@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Linq.Expressions;
+using CrudDatastore;
 
 namespace CrudDatastore.MultiDbClientORM
 {
@@ -30,9 +31,5 @@ namespace CrudDatastore.MultiDbClientORM
             return context.FindSingle(new Specification<T>(predicate));
         }
 
-        public static void Execute(this DataContextBase context, string sql, params object[] parameters)
-        {
-            context.Execute(new Command(sql, parameters));
-        }
     }
 }
