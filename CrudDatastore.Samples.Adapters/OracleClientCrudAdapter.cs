@@ -1,8 +1,7 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -10,10 +9,11 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using CrudDatastore;
 using CrudDatastore.Framework;
+using Oracle.ManagedDataAccess.Client;
 
-namespace CrudDatastore.SqlClientORM
+namespace CrudDatastore.Samples.Adapters.Oracle
 {
-    public class SqlClientCrudAdapter<T> : DelegateCrudAdapter<T> where T : EntityBase, new()
+    public class OracleClientCrudAdapter<T> : DelegateCrudAdapter<T> where T : EntityBase, new()
     {
         private static WhereBuilder _whereBuilder = new WhereBuilder();
 
@@ -25,25 +25,25 @@ namespace CrudDatastore.SqlClientORM
         private static string _deleteCommand;
         private static string _selectCommand;
 
-        private static ISqlCommandFactory _factory;
+        private static string _connectionString;
 
-        public SqlClientCrudAdapter(ISqlCommandFactory factory)
-            : this(factory, GetTableName())
+        public OracleClientCrudAdapter(string connectionString)
+            : this(connectionString, GetTableName())
         { }
 
-        public SqlClientCrudAdapter(ISqlCommandFactory factory, string tableName)
-            : this(factory, tableName, GetPropertyKey())
+        public OracleClientCrudAdapter(string connectionString, string tableName)
+            : this(connectionString, tableName, GetPropertyKey())
         { }
 
-        public SqlClientCrudAdapter(ISqlCommandFactory factory, string tableName, Expression<Func<T, object>> key)
-            : this(factory, tableName, key, IsIdentity(GetPropertyKeyName(key)))
+        public OracleClientCrudAdapter(string connectionString, string tableName, Expression<Func<T, object>> key)
+            : this(connectionString, tableName, key, IsIdentity(GetPropertyKeyName(key)))
         { }
 
-        public SqlClientCrudAdapter(ISqlCommandFactory factory, string tableName, Expression<Func<T, object>> key, bool isIdentity)
-            : this(factory, tableName, GetPropertyKeyName(key), isIdentity)
+        public OracleClientCrudAdapter(string connectionString, string tableName, Expression<Func<T, object>> key, bool isIdentity)
+            : this(connectionString, tableName, GetPropertyKeyName(key), isIdentity)
         { }
 
-        private SqlClientCrudAdapter(ISqlCommandFactory factory, string tableName, string keyName, bool isIdentity)
+        private OracleClientCrudAdapter(string connectionString, string tableName, string keyName, bool isIdentity)
             : base
             (
                 /* create */
@@ -96,22 +96,22 @@ namespace CrudDatastore.SqlClientORM
                 _fieldList = typeof(T).GetProperties().Where(p => p.PropertyType.IsSealed && p.GetAccessors().Any(a => !(a.IsVirtual && !a.IsFinal) && a.ReturnType == typeof(void))).Select(p => p.Name).ToList();
                 _fieldListWithoutKey = _fieldList.Where(f => !string.Equals(f, keyName, StringComparison.OrdinalIgnoreCase)).ToList();
 
-                _insertCommand = string.Format("INSERT INTO [{0}] ({1}) VALUES ({2}){3}", tableName,
-                    string.Join(", ", _fieldListWithoutKey.Select(f => string.Format("[{0}]", f))),
-                    string.Join(", ", _fieldListWithoutKey.Select(f => string.Format("@{0}", f))),
-                    isIdentity ? "; SELECT CAST(SCOPE_IDENTITY() AS INT);" : "");
+                _insertCommand = string.Format("INSERT INTO \"{0}\" ({1}) VALUES ({2}){3}", tableName,
+                    string.Join(", ", _fieldListWithoutKey.Select(f => string.Format("\"{0}\"", f))),
+                    string.Join(", ", _fieldListWithoutKey.Select(f => string.Format(":\"{0}\"", f))),
+                    isIdentity ? string.Format(" RETURNING \"{0}\" INTO :\"IDENTITY\"", keyName) : "");
 
-                _updateCommand = string.Format("UPDATE [{0}] SET {1} WHERE {2}", tableName,
-                    string.Join(", ", _fieldListWithoutKey.Select(f => string.Format("[{0}] = @{0}", f))),
-                    string.Format("[{0}] = @{0}", keyName));
+                _updateCommand = string.Format("UPDATE \"{0}\" SET {1} WHERE {2}", tableName,
+                    string.Join(", ", _fieldListWithoutKey.Select(f => string.Format("\"{0}\" = :\"{0}\"", f))),
+                    string.Format("\"{0}\" = :\"{0}\"", keyName));
 
-                _deleteCommand = string.Format("DELETE [{0}] WHERE {1}", tableName,
-                    string.Format("[{0}] = @{0}", keyName));
+                _deleteCommand = string.Format("DELETE \"{0}\" WHERE {1}", tableName,
+                    string.Format("\"{0}\" = :\"{0}\"", keyName));
 
-                _selectCommand = string.Format("SELECT {1} FROM [{0}]", tableName,
-                    string.Join(", ", _fieldList.Select(f => string.Format("[{0}]", f))));
+                _selectCommand = string.Format("SELECT {1} FROM \"{0}\"", tableName,
+                    string.Join(", ", _fieldList.Select(f => string.Format("\"{0}\"", f))));
 
-                _factory = factory;
+                _connectionString = connectionString;
             }
         }
 
@@ -165,51 +165,71 @@ namespace CrudDatastore.SqlClientORM
 
         private static object Execute(string sql, IDictionary<string, object> parameters, bool isScalar = false)
         {
-            using (var command = _factory.CreateSqlCommand())
+            using (var connection = new OracleConnection(_connectionString))
             {
-                command.CommandText = sql;
-                command.CommandType = CommandType.Text;
-
-                foreach (var param in parameters)
+                using (var command = connection.CreateCommand())
                 {
-                    command.Parameters.AddWithValue(string.Format("@{0}", param.Key), param.Value ?? DBNull.Value);
+                    command.CommandText = sql;
+                    command.CommandType = CommandType.Text;
+
+                    foreach (var param in parameters)
+                    {
+                        command.Parameters.Add(string.Format(":\"{0}\"", param.Key), param.Value ?? DBNull.Value);
+                    }
+
+                    OracleParameter identity = null;
+                    if (isScalar)
+                    {
+                        identity = new OracleParameter();
+                        identity.ParameterName = ":\"IDENTITY\"";
+                        identity.DbType = DbType.Decimal;
+                        identity.Direction = ParameterDirection.Output;
+                        command.Parameters.Add(identity);
+                    }
+
+                    connection.Open();
+
+                    command.ExecuteNonQuery();
+
+                    return identity != null ? identity.Value : 0;
                 }
-
-                var ret = isScalar ? command.ExecuteScalar() : command.ExecuteNonQuery();
-
-                return ret;
             }
         }
 
         private static IQueryable<T> ExecuteQuery(string sql, IDictionary<string, object> parameters)
         {
             var data = new List<T>();
-            using (var command = _factory.CreateSqlCommand())
+
+            using (var connection = new OracleConnection(_connectionString))
             {
-                command.CommandText = sql;
-                command.CommandType = CommandType.Text;
-
-                foreach (var param in parameters)
+                using (var command = connection.CreateCommand())
                 {
-                    command.Parameters.AddWithValue(string.Format("@{0}", param.Key), param.Value ?? DBNull.Value);
-                }
+                    command.CommandText = sql;
+                    command.CommandType = CommandType.Text;
 
-                using (SqlDataReader dr = command.ExecuteReader())
-                {
-                    if (dr.HasRows)
+                    foreach (var param in parameters)
                     {
-                        while (dr.Read())
-                        {
-                            var t = typeof(T);
-                            var entry = new T();
-                            foreach (var field in _fieldList)
-                            {
-                                var value = dr.GetValue(dr.GetOrdinal(field));
-                                var prop = t.GetProperty(field);
-                                prop.SetValue(entry, Convert.ChangeType(value is DBNull ? null : value, prop.PropertyType));
-                            }
+                        command.Parameters.Add(string.Format(":\"{0}\"", param.Key), param.Value ?? DBNull.Value);
+                    }
 
-                            data.Add(entry);
+                    connection.Open();
+                    using (OracleDataReader dr = command.ExecuteReader())
+                    {
+                        if (dr.HasRows || true)
+                        {
+                            while (dr.Read())
+                            {
+                                var t = typeof(T);
+                                var entry = new T();
+                                foreach (var field in _fieldList)
+                                {
+                                    var value = dr.GetValue(dr.GetOrdinal(field));
+                                    var prop = t.GetProperty(field);
+                                    prop.SetValue(entry, Convert.ChangeType(value is DBNull ? null : value, prop.PropertyType));
+                                }
+
+                                data.Add(entry);
+                            }
                         }
                     }
                 }
@@ -239,7 +259,7 @@ namespace CrudDatastore.SqlClientORM
                 finalQuery.Append(whereParts.Sql);
                 foreach (var p in whereParts.Parameters)
                 {
-                    var val = "@" + p.Key;
+                    var val = ":" + p.Key;
                     finalQuery = finalQuery.Replace(val, ValueToString(p.Value, false));
                 }
                 return finalQuery.ToString();
@@ -300,7 +320,7 @@ namespace CrudDatastore.SqlClientORM
                         {
                             return WherePart.Concat(Recurse(ref i, expression), "=", WherePart.IsParameter(i++, true));
                         }
-                        return WherePart.IsSql("[" + colName + "]");
+                        return WherePart.IsSql("\"" + colName + "\"");
                     }
                     if (member.Member is FieldInfo)
                     {
@@ -479,7 +499,7 @@ namespace CrudDatastore.SqlClientORM
                 return new WherePart()
                 {
                     Parameters = { { count.ToString(), value } },
-                    Sql = $"@{count}"
+                    Sql = $":\"{count}\""
                 };
             }
 
@@ -490,7 +510,7 @@ namespace CrudDatastore.SqlClientORM
                 foreach (var value in values)
                 {
                     parameters.Add((countStart).ToString(), value);
-                    sql.Append($"@{countStart},");
+                    sql.Append($":\"{countStart}\",");
                     countStart++;
                 }
                 if (sql.Length == 1)

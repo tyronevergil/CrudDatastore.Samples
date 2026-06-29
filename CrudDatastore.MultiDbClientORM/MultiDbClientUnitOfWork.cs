@@ -2,6 +2,8 @@
 using System.Transactions;
 using CrudDatastore.Framework;
 using CrudDatastore.MultiDbClientORM.Entities;
+using CrudDatastore.Samples.Adapters.Oracle;
+using CrudDatastore.Samples.Adapters.Sql;
 
 namespace CrudDatastore.MultiDbClientORM
 {

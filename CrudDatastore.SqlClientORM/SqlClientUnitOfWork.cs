@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data.SqlClient;
 using CrudDatastore.Framework;
+using CrudDatastore.Samples.Adapters.Sql;
 using CrudDatastore.SqlClientORM.Entities;
 
 namespace CrudDatastore.SqlClientORM
@@ -112,10 +113,5 @@ namespace CrudDatastore.SqlClientORM
         {
             Dispose(false);
         }
-    }
-
-    public interface ISqlCommandFactory
-    {
-        SqlCommand CreateSqlCommand();
     }
 }

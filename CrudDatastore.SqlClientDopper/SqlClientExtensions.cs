@@ -6,6 +6,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using CrudDatastore;
 using CrudDatastore.Framework;
+using CrudDatastore.Samples.Adapters.Sql;
 
 namespace CrudDatastore.SqlClientDopper
 {
@@ -365,10 +366,5 @@ namespace CrudDatastore.SqlClientDopper
                 return _factory();
             }
         }
-    }
-
-    public interface ISqlCommandFactory
-    {
-        SqlCommand CreateSqlCommand();
     }
 }

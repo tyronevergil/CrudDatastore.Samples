@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
@@ -11,7 +11,7 @@ using System.Text;
 using CrudDatastore;
 using CrudDatastore.Framework;
 
-namespace CrudDatastore.MultiDbClientORM
+namespace CrudDatastore.Samples.Adapters.Sql
 {
     public class SqlClientCrudAdapter<T> : DelegateCrudAdapter<T> where T : EntityBase, new()
     {
@@ -25,25 +25,41 @@ namespace CrudDatastore.MultiDbClientORM
         private static string _deleteCommand;
         private static string _selectCommand;
 
-        private static string _connectionString;
+        private static ISqlCommandFactory _factory;
 
         public SqlClientCrudAdapter(string connectionString)
-            : this(connectionString, GetTableName())
+            : this(new ConnectionStringSqlCommandFactory(connectionString), GetTableName())
         { }
 
         public SqlClientCrudAdapter(string connectionString, string tableName)
-            : this(connectionString, tableName, GetPropertyKey())
+            : this(new ConnectionStringSqlCommandFactory(connectionString), tableName, GetPropertyKey())
         { }
 
         public SqlClientCrudAdapter(string connectionString, string tableName, Expression<Func<T, object>> key)
-            : this(connectionString, tableName, key, IsIdentity(GetPropertyKeyName(key)))
+            : this(new ConnectionStringSqlCommandFactory(connectionString), tableName, key, IsIdentity(GetPropertyKeyName(key)))
         { }
 
         public SqlClientCrudAdapter(string connectionString, string tableName, Expression<Func<T, object>> key, bool isIdentity)
-            : this(connectionString, tableName, GetPropertyKeyName(key), isIdentity)
+            : this(new ConnectionStringSqlCommandFactory(connectionString), tableName, GetPropertyKeyName(key), isIdentity)
         { }
 
-        private SqlClientCrudAdapter(string connectionString, string tableName, string keyName, bool isIdentity)
+        public SqlClientCrudAdapter(ISqlCommandFactory factory)
+            : this(factory, GetTableName())
+        { }
+
+        public SqlClientCrudAdapter(ISqlCommandFactory factory, string tableName)
+            : this(factory, tableName, GetPropertyKey())
+        { }
+
+        public SqlClientCrudAdapter(ISqlCommandFactory factory, string tableName, Expression<Func<T, object>> key)
+            : this(factory, tableName, key, IsIdentity(GetPropertyKeyName(key)))
+        { }
+
+        public SqlClientCrudAdapter(ISqlCommandFactory factory, string tableName, Expression<Func<T, object>> key, bool isIdentity)
+            : this(factory, tableName, GetPropertyKeyName(key), isIdentity)
+        { }
+
+        private SqlClientCrudAdapter(ISqlCommandFactory factory, string tableName, string keyName, bool isIdentity)
             : base
             (
                 /* create */
@@ -111,7 +127,7 @@ namespace CrudDatastore.MultiDbClientORM
                 _selectCommand = string.Format("SELECT {1} FROM [{0}]", tableName,
                     string.Join(", ", _fieldList.Select(f => string.Format("[{0}]", f))));
 
-                _connectionString = connectionString;
+                _factory = factory;
             }
         }
 
@@ -163,62 +179,77 @@ namespace CrudDatastore.MultiDbClientORM
             return false;
         }
 
+        private class ConnectionStringSqlCommandFactory : ISqlCommandFactory
+        {
+            private readonly string _connectionString;
+
+            public ConnectionStringSqlCommandFactory(string connectionString)
+            {
+                _connectionString = connectionString;
+            }
+
+            public SqlCommand CreateSqlCommand()
+            {
+                var connection = new SqlConnection(_connectionString);
+                var command = connection.CreateCommand();
+                command.Disposed += (sender, e) =>
+                {
+                    connection.Close();
+                    connection.Dispose();
+                };
+
+                connection.Open();
+                return command;
+            }
+        }
+
         private static object Execute(string sql, IDictionary<string, object> parameters, bool isScalar = false)
         {
-            using (var connection = new SqlConnection(_connectionString))
+            using (var command = _factory.CreateSqlCommand())
             {
-                using (var command = connection.CreateCommand())
+                command.CommandText = sql;
+                command.CommandType = CommandType.Text;
+
+                foreach (var param in parameters)
                 {
-                    command.CommandText = sql;
-                    command.CommandType = CommandType.Text;
-
-                    foreach (var param in parameters)
-                    {
-                        command.Parameters.AddWithValue(string.Format("@{0}", param.Key), param.Value ?? DBNull.Value);
-                    }
-
-                    connection.Open();
-                    var ret = isScalar ? command.ExecuteScalar() : command.ExecuteNonQuery();
-
-                    return ret;
+                    command.Parameters.AddWithValue(string.Format("@{0}", param.Key), param.Value ?? DBNull.Value);
                 }
+
+                var ret = isScalar ? command.ExecuteScalar() : command.ExecuteNonQuery();
+
+                return ret;
             }
         }
 
         private static IQueryable<T> ExecuteQuery(string sql, IDictionary<string, object> parameters)
         {
             var data = new List<T>();
-
-            using (var connection = new SqlConnection(_connectionString))
+            using (var command = _factory.CreateSqlCommand())
             {
-                using (var command = connection.CreateCommand())
+                command.CommandText = sql;
+                command.CommandType = CommandType.Text;
+
+                foreach (var param in parameters)
                 {
-                    command.CommandText = sql;
-                    command.CommandType = CommandType.Text;
+                    command.Parameters.AddWithValue(string.Format("@{0}", param.Key), param.Value ?? DBNull.Value);
+                }
 
-                    foreach (var param in parameters)
+                using (SqlDataReader dr = command.ExecuteReader())
+                {
+                    if (dr.HasRows)
                     {
-                        command.Parameters.AddWithValue(string.Format("@{0}", param.Key), param.Value ?? DBNull.Value);
-                    }
-
-                    connection.Open();
-                    using (SqlDataReader dr = command.ExecuteReader())
-                    {
-                        if (dr.HasRows)
+                        while (dr.Read())
                         {
-                            while (dr.Read())
+                            var t = typeof(T);
+                            var entry = new T();
+                            foreach (var field in _fieldList)
                             {
-                                var t = typeof(T);
-                                var entry = new T();
-                                foreach (var field in _fieldList)
-                                {
-                                    var value = dr.GetValue(dr.GetOrdinal(field));
-                                    var prop = t.GetProperty(field);
-                                    prop.SetValue(entry, Convert.ChangeType(value is DBNull ? null : value, prop.PropertyType));
-                                }
-
-                                data.Add(entry);
+                                var value = dr.GetValue(dr.GetOrdinal(field));
+                                var prop = t.GetProperty(field);
+                                prop.SetValue(entry, Convert.ChangeType(value is DBNull ? null : value, prop.PropertyType));
                             }
+
+                            data.Add(entry);
                         }
                     }
                 }
