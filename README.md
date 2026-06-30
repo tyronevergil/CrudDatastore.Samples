@@ -12,12 +12,9 @@ All samples target **.NET Framework 4.8.1** and use **CrudDatastore 2.0.0-previe
 | Project | What it shows |
 |---------|---------------|
 | [`SqlClient`](#sqlclient) | Plain CRUD via `DataContext` backed by SQL Server |
-| [`SqlClientORM`](#sqlclientorm) | ORM-style CRUD with navigation properties and shared transactions |
-| [`SqlClientDopper`](#sqlclientdopper) | Dapper-style extension methods directly on `SqlConnection` |
+| [`SqlClientORM`](#sqlclientorm) | ORM-style CRUD with navigation properties and atomic multi-table commits |
+| [`SqlClientDopper`](#sqlclientdopper) | Extension methods directly on `SqlConnection` — no `DataContext` required |
 | [`MultiDbClientORM`](#multidbclientorm) | ORM-style CRUD spanning SQL Server **and** Oracle in one unit of work |
-
-All projects share a common adapter library (`CrudDatastore.Samples.Adapters`) that provides
-the SQL Server and Oracle `DelegateCrudAdapter<T>` implementations.
 
 ---
 
@@ -179,7 +176,7 @@ SqlClientORM/
 │   ├── Person.cs             ← has List<Identification> Identifications
 │   └── Identification.cs
 ├── InMemoryUnitOfWork.cs     ← seeds data and maps navigation property
-├── SqlClientUnitOfWork.cs    ← implements ISqlCommandFactory; shared tx on Commit()
+├── SqlClientUnitOfWork.cs    ← implements ISqlCommandFactory; opens one connection and transaction on Commit()
 ├── DataContext.cs
 ├── UnitTest.cs
 └── IntegrationTest.cs
@@ -191,9 +188,9 @@ SqlClientORM/
 
 > `CrudDatastore.Samples.SqlClientDopper`
 
-A **Dapper-style** API — extension methods hang directly off `SqlConnection` with no
-`DataContext` or unit-of-work ceremony. Useful when you already have an open connection
-and want lightweight CRUD without a full context.
+Extension methods that hang directly off `SqlConnection` with no `DataContext` or
+unit-of-work ceremony. Useful when you already have an open connection and want
+lightweight CRUD without a full context.
 
 All methods accept an optional `SqlTransaction` for transactional writes.
 
