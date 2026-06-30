@@ -8,7 +8,7 @@ namespace CrudDatastore.Samples.SqlClientDopper
 {
     [TestFixture]
     [Category("Integration")]
-    public class Test
+    public class IntegrationTest
     {
         private string _connectionString;
 
@@ -94,5 +94,3 @@ namespace CrudDatastore.Samples.SqlClientDopper
         }
     }
 }
-
-

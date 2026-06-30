@@ -40,7 +40,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Test.cs" />
+    <Compile Include="IntegrationTest.cs" />
     <Compile Include="Entities\Identification.cs" />
     <Compile Include="Entities\Person.cs" />
     <Compile Include="SqlClientExtensions.cs" />
