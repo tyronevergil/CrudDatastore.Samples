@@ -36,14 +36,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="SqlCommandFactory.cs" />
-    <Compile Include="OracleCommandFactory.cs" />
-    <Compile Include="IOracleCommandFactory.cs" />
-    <Compile Include="ISqlCommandFactory.cs" />
-    <Compile Include="SqlClientCrudAdapter.cs" />
-    <Compile Include="SqlClientQueryAdapter.cs" />
-    <Compile Include="OracleClientCrudAdapter.cs" />
-    <Compile Include="OracleClientQueryAdapter.cs" />
+    <Compile Include="Sql\ISqlCommandFactory.cs" />
+    <Compile Include="Sql\SqlCommandFactory.cs" />
+    <Compile Include="Sql\SqlClientCrudAdapter.cs" />
+    <Compile Include="Sql\SqlClientQueryAdapter.cs" />
+    <Compile Include="Oracle\IOracleCommandFactory.cs" />
+    <Compile Include="Oracle\OracleCommandFactory.cs" />
+    <Compile Include="Oracle\OracleClientCrudAdapter.cs" />
+    <Compile Include="Oracle\OracleClientQueryAdapter.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
