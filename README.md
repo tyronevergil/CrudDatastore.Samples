@@ -13,7 +13,7 @@ All samples target **.NET Framework 4.8.1** and use **CrudDatastore 2.0.0-previe
 |---------|---------------|
 | [`SqlClient`](#sqlclient) | Plain CRUD via `DataContext` backed by SQL Server |
 | [`SqlClientORM`](#sqlclientorm) | ORM-style CRUD with navigation properties and atomic multi-table commits |
-| [`SqlClientDopper`](#sqlclientdopper) | Extension methods directly on `SqlConnection` — no `DataContext` required |
+| [`SqlClientDopper`](#sqlclientdopper) | Extension methods directly on `SqlConnection` |
 | [`MultiDbClientORM`](#multidbclientorm) | ORM-style CRUD spanning SQL Server **and** Oracle in one unit of work |
 
 ---
