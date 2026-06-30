@@ -36,8 +36,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ConnectionStringOracleCommandFactory.cs" />
-    <Compile Include="ConnectionStringSqlCommandFactory.cs" />
     <Compile Include="SqlCommandFactory.cs" />
     <Compile Include="OracleCommandFactory.cs" />
     <Compile Include="IOracleCommandFactory.cs" />
