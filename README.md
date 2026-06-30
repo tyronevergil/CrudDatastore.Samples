@@ -1,132 +1,330 @@
 # CrudDatastore.Samples
 
-## Baseline snapshot
+Sample projects demonstrating the different ways to use [CrudDatastore](https://github.com/tyronevergil/CrudDatastore)
+— a lightweight data-store abstraction for .NET.
 
-- A `v1` branch has been created from current `master` so you have a stable baseline before the package migration.
+All samples target **.NET Framework 4.8.1** and use **CrudDatastore 2.0.0-preview.1**.
 
-## Migration path to `CrudDatastore 2.0.0-preview.1` (targeting `.NET Framework 4.8.1`)
+---
 
-### Applied changes
+## Projects at a glance
 
-1. **Baseline branch**
-   - `v1` branch was created from current `master`.
+| Project | What it shows |
+|---------|---------------|
+| [`SqlClient`](#sqlclient) | Plain CRUD via `DataContext` backed by SQL Server |
+| [`SqlClientORM`](#sqlclientorm) | ORM-style CRUD with navigation properties and shared transactions |
+| [`SqlClientDopper`](#sqlclientdopper) | Dapper-style extension methods directly on `SqlConnection` |
+| [`MultiDbClientORM`](#multidbclientorm) | ORM-style CRUD spanning SQL Server **and** Oracle in one unit of work |
 
-2. **Project target framework**
-   - All projects were retargeted to `v4.8.1`:
-	 - `CrudDatastore.SqlClient`
-	 - `CrudDatastore.SqlClientORM`
-	 - `CrudDatastore.MultiDbClientORM`
-	 - `CrudDatastore.SqlClientDopper`
+All projects share a common adapter library (`CrudDatastore.Samples.Adapters`) that provides
+the SQL Server and Oracle `DelegateCrudAdapter<T>` implementations.
 
-3. **Package migration**
-   - Updated `CrudDatastore` to `2.0.0-preview.1` in all `packages.config` files.
-   - Updated `.csproj` `HintPath` references to:
-	 - `..\packages\CrudDatastore.2.0.0-preview.1\lib\net481\CrudDatastore.dll`
+---
 
-4. **Restore status**
-   - NuGet restore completed successfully via MSBuild (`/t:Restore /p:RestorePackagesConfig=true`).
+## Running the tests
 
-### API migration status
+Each project contains two test classes:
 
-The v2 API migration pass has been applied and the solution now builds successfully.
+| Class | Backend | When it runs |
+|-------|---------|--------------|
+| `UnitTest` | In-memory list (`InMemoryListExtensions`) | Always — no config needed |
+| `IntegrationTest` | Real database | Only when a connection string is set in `App.config` |
 
-Key updates completed:
-- Added `CrudDatastore.Framework` namespace usage where `DelegateCrudAdapter<T>`, `DataStore<T>`, and `UnitOfWorkBase` are used.
-- Updated command execution in `SqlClientDopper/SqlClientExtensions.cs` from legacy `Command`/`IDataCommand` patterns to `Action`/`ICommand` and `SatisfyingActionFrom(...)`.
-- Removed legacy `Execute(...)` extension methods tied to removed `DataContextBase` command APIs.
+Integration tests skip automatically (via NUnit `Assume.That`) when the connection string is empty,
+so the default test run is always green without any database.
 
-### Validation
+To run integration tests against real databases, see **[INTEGRATION-TESTING.md](INTEGRATION-TESTING.md)**.
 
-- Package restore: successful
-- Solution build: successful
-- Next recommended validation: run project test flows (Create/Update/Delete/Find) against your target databases.
+---
 
-## Project samples
+## SqlClient
 
-> These examples are aligned with the project `Test.cs` files and show the intended usage pattern.
+> `CrudDatastore.Samples.SqlClient`
 
-### `CrudDatastore.MultiDbClientORM`
+The simplest pattern. A `DataContext` wraps a `UnitOfWorkBase` that registers plain
+`DataStore<T>` instances backed by `SqlClientCrudAdapter<T>`.
+
+**Unit of work setup**
+
+```csharp
+// In-memory (default — no connection string required)
+DataContext.Factory()
+
+// SQL Server
+DataContext.Factory("Server=localhost;Database=CrudDatastoreTest;...")
+```
+
+**CRUD**
 
 ```csharp
 using (var context = DataContext.Factory())
 {
+	// Create
+	var person = new Person { Firstname = "Pauline", Lastname = "Koch" };
+	context.Add(person);
+	context.SaveChanges();
+	// person.PersonId is now populated
+
+	// Read
+	var all    = context.Find<Person>(p => true);
+	var single = context.FindSingle<Person>(p => p.PersonId == person.PersonId);
+
+	// Update
+	single.Firstname = "Paula";
+	context.Update(single);
+	context.SaveChanges();
+
+	// Delete
+	context.Delete(single);
+	context.SaveChanges();
+}
+```
+
+**Key files**
+
+```
+SqlClient/
+├── Entities/
+│   ├── Person.cs
+│   └── Identification.cs
+├── InMemoryUnitOfWork.cs   ← seeds test data via InMemoryListExtensions
+├── SqlClientUnitOfWork.cs  ← wires SqlClientCrudAdapter<T> per entity
+├── DataContext.cs          ← Factory() / Factory(connectionString)
+├── UnitTest.cs             ← in-memory tests
+└── IntegrationTest.cs      ← SQL Server tests (skipped when not configured)
+```
+
+---
+
+## SqlClientORM
+
+> `CrudDatastore.Samples.SqlClientORM`
+
+Extends the basic pattern with **navigation properties** and a **shared transaction**
+across all stores in a single `Commit()`.
+
+The `SqlClientUnitOfWork` implements `ISqlCommandFactory` so all adapters share one
+`SqlConnection`/`SqlTransaction` during a commit, giving atomic multi-table writes.
+
+**Unit of work setup**
+
+```csharp
+// In-memory (default)
+DataContext.Factory()
+
+// SQL Server (shared transaction)
+DataContext.Factory("Server=localhost;Database=CrudDatastoreTest;...")
+```
+
+**CRUD with navigation properties**
+
+```csharp
+using (var context = DataContext.Factory())
+{
+	// Create with related entities
 	var person = new Person
 	{
 		Firstname = "Pauline",
-		Lastname = "Koch",
+		Lastname  = "Koch",
+		Identifications = new List<Identification>
+		{
+			new Identification { Type = Identification.Types.SSN, Number = "222-222-2222" }
+		}
+	};
+	context.Add(person);
+	context.SaveChanges();
+
+	// Read — Identifications is populated automatically
+	var loaded = context.FindSingle<Person>(p => p.PersonId == person.PersonId);
+	var ids    = loaded.Identifications; // List<Identification>
+
+	// Update — add another identification
+	loaded.Identifications.Add(new Identification { Type = Identification.Types.TIN, Number = "333-333" });
+	context.Update(loaded);
+	context.SaveChanges();
+
+	// Delete — cascades to child identifications
+	context.Delete(loaded);
+	context.SaveChanges();
+}
+```
+
+**Key files**
+
+```
+SqlClientORM/
+├── Entities/
+│   ├── Person.cs             ← has List<Identification> Identifications
+│   └── Identification.cs
+├── InMemoryUnitOfWork.cs     ← seeds data and maps navigation property
+├── SqlClientUnitOfWork.cs    ← implements ISqlCommandFactory for shared tx
+├── DataContext.cs
+├── UnitTest.cs
+└── IntegrationTest.cs
+```
+
+---
+
+## SqlClientDopper
+
+> `CrudDatastore.Samples.SqlClientDopper`
+
+A **Dapper-style** API — extension methods hang directly off `SqlConnection` with no
+`DataContext` or unit-of-work ceremony. Useful when you already have an open connection
+and want lightweight CRUD without a full context.
+
+All methods accept an optional `SqlTransaction` for transactional writes.
+
+**Usage**
+
+```csharp
+using (var connection = new SqlConnection("Server=localhost;Database=CrudDatastoreTest;..."))
+{
+	// Create
+	var person = new Person { Firstname = "Pauline", Lastname = "Koch" };
+	connection.Add(person);
+	// person.PersonId is now populated
+
+	// Read
+	var all    = connection.Find<Person>(p => true);
+	var single = connection.FindSingle<Person>(p => p.PersonId == person.PersonId);
+
+	// Update
+	single.Firstname = "Paula";
+	connection.Update(single);
+
+	// Delete
+	connection.Delete(single);
+}
+```
+
+**With a transaction**
+
+```csharp
+using (var connection = new SqlConnection("..."))
+using (var tx = connection.BeginTransaction())
+{
+	connection.Add(person, tx);
+	connection.Update(other, tx);
+	tx.Commit();
+}
+```
+
+**Key files**
+
+```
+SqlClientDopper/
+├── Entities/
+│   └── Person.cs
+├── SqlClientExtensions.cs   ← Find / FindSingle / Add / Update / Delete / Execute
+├── IntegrationTest.cs       ← SQL Server tests (skipped when not configured)
+```
+
+> `SqlClientDopper` has no `UnitTest.cs` because the extension methods require a real
+> `SqlConnection`; all tests are integration tests.
+
+---
+
+## MultiDbClientORM
+
+> `CrudDatastore.Samples.MultiDbClientORM`
+
+Demonstrates a single unit of work that spans **two databases** — `Person` rows live in
+SQL Server and `Identification` rows live in Oracle. Navigation properties work across
+the database boundary transparently.
+
+Commit is sequential (SQL Server first, then Oracle). See the comment in
+`MultiDbClientUnitOfWork.cs` for how to swap in a `TransactionScope` + MSDTC if you need
+true two-phase commit on Windows.
+
+**Unit of work setup**
+
+```csharp
+// In-memory (default — both stores in memory)
+DataContext.Factory()
+
+// SQL Server + Oracle
+DataContext.Factory(
+	"Server=localhost,1433;Database=CrudDatastoreTest;User Id=sa;Password=...;",
+	"User Id=crudtest;Password=...;Data Source=localhost:1521/XEPDB1;"
+)
+```
+
+**CRUD**
+
+```csharp
+using (var context = DataContext.Factory(sqlCs, oracleCs))
+{
+	// Create — Person → SQL Server, Identification → Oracle
+	var person = new Person
+	{
+		Firstname = "Pauline",
+		Lastname  = "Koch",
 		Identifications = new List<Identification>
 		{
 			new Identification { Type = 1, Number = "222-222-2222" }
 		}
 	};
-
 	context.Add(person);
 	context.SaveChanges();
 
+	// Read — navigation property resolves cross-database
 	var loaded = context.FindSingle<Person>(p => p.PersonId == person.PersonId);
+	var ids    = loaded.Identifications;
+
+	// Update / Delete work the same as SqlClientORM
 }
 ```
 
-### `CrudDatastore.SqlClient`
+**Key files**
 
-```csharp
-using (var context = DataContext.Factory())
-{
-	var person = new Person
-	{
-		Firstname = "Pauline",
-		Lastname = "Koch"
-	};
-
-	context.Add(person);
-
-	var people = context.Find<Person>(p => p.Lastname == "Koch");
-}
+```
+MultiDbClientORM/
+├── Entities/
+│   ├── Person.cs
+│   └── Identification.cs
+├── InMemoryUnitOfWork.cs        ← both stores in memory
+├── MultiDbClientUnitOfWork.cs   ← SQL Server + Oracle, sequential commit
+├── DataContext.cs               ← Factory() / Factory(sqlCs, oracleCs)
+├── UnitTest.cs
+└── IntegrationTest.cs
 ```
 
-### `CrudDatastore.SqlClientDopper`
+---
 
-```csharp
-using (var connection = new SqlConnection("<connectionstring>"))
-{
-	var person = new Person
-	{
-		Firstname = "Pauline",
-		Lastname = "Koch"
-	};
+## Shared adapters
 
-	connection.Add(person);
+`CrudDatastore.Samples.Adapters` is referenced by all four projects and provides:
 
-	var loaded = connection.FindSingle<Person>(p => p.PersonId == person.PersonId);
-}
+```
+Adapters/
+├── Sql/
+│   ├── ISqlCommandFactory.cs       ← abstraction over SqlCommand creation
+│   ├── SqlCommandFactory.cs        ← default: new SqlConnection per command
+│   ├── SqlClientCrudAdapter.cs     ← DelegateCrudAdapter<T> for SQL Server
+│   └── SqlClientQueryAdapter.cs    ← predicate → WHERE clause translation
+└── Oracle/
+	├── IOracleCommandFactory.cs
+	├── OracleCommandFactory.cs
+	├── OracleClientCrudAdapter.cs
+	└── OracleClientQueryAdapter.cs
 ```
 
-### `CrudDatastore.SqlClientORM`
+The factory abstraction (`ISqlCommandFactory` / `IOracleCommandFactory`) lets adapters
+work with either a standalone connection (`SqlCommandFactory`) or a shared transactional
+connection (e.g. `SqlClientORM`'s `SqlClientUnitOfWork : ISqlCommandFactory`).
 
-```csharp
-using (var context = DataContext.Factory())
-{
-	var person = new Person
-	{
-		Firstname = "Pauline",
-		Lastname = "Koch",
-		Identifications = new List<Identification>
-		{
-			new Identification
-			{
-				Type = Identification.Types.SSN,
-				Number = "222-222-2222"
-			}
-		}
-	};
+---
 
-	context.Add(person);
-	context.SaveChanges();
+## Integration testing with Docker
 
-	var people = context.Find<Person>(p => p.PersonId > 0);
-}
+The repo ships a `docker-compose.yml` that starts SQL Server 2022 and Oracle XE 21c
+locally with the schema pre-loaded.
+
+```powershell
+docker-compose up -d   # start both databases
+docker-compose ps      # wait until STATUS = healthy
 ```
 
-## Next step
-
-- Optional: run and verify all sample tests with real SQL Server/Oracle connection strings to validate runtime behavior under `CrudDatastore 2.0.0-preview.1`.
+Then fill in the connection strings in each project's `App.config` and run the
+`[Category("Integration")]` tests. Full instructions: **[INTEGRATION-TESTING.md](INTEGRATION-TESTING.md)**.
