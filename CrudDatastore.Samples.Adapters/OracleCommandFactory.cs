@@ -2,11 +2,11 @@ using Oracle.ManagedDataAccess.Client;
 
 namespace CrudDatastore.Samples.Adapters.Oracle
 {
-    public class ConnectionStringOracleCommandFactory : IOracleCommandFactory
+    public class OracleCommandFactory : IOracleCommandFactory
     {
         private readonly string _connectionString;
 
-        public ConnectionStringOracleCommandFactory(string connectionString)
+        public OracleCommandFactory(string connectionString)
         {
             _connectionString = connectionString;
         }

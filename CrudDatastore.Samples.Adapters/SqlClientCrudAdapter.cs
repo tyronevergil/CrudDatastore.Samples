@@ -23,19 +23,19 @@ namespace CrudDatastore.Samples.Adapters.Sql
         private static ISqlCommandFactory _factory;
 
         public SqlClientCrudAdapter(string connectionString)
-            : this(new ConnectionStringSqlCommandFactory(connectionString), GetTableName())
+            : this(new SqlCommandFactory(connectionString), GetTableName())
         { }
 
         public SqlClientCrudAdapter(string connectionString, string tableName)
-            : this(new ConnectionStringSqlCommandFactory(connectionString), tableName, GetPropertyKey())
+            : this(new SqlCommandFactory(connectionString), tableName, GetPropertyKey())
         { }
 
         public SqlClientCrudAdapter(string connectionString, string tableName, Expression<Func<T, object>> key)
-            : this(new ConnectionStringSqlCommandFactory(connectionString), tableName, key, IsIdentity(GetPropertyKeyName(key)))
+            : this(new SqlCommandFactory(connectionString), tableName, key, IsIdentity(GetPropertyKeyName(key)))
         { }
 
         public SqlClientCrudAdapter(string connectionString, string tableName, Expression<Func<T, object>> key, bool isIdentity)
-            : this(new ConnectionStringSqlCommandFactory(connectionString), tableName, GetPropertyKeyName(key), isIdentity)
+            : this(new SqlCommandFactory(connectionString), tableName, GetPropertyKeyName(key), isIdentity)
         { }
 
         public SqlClientCrudAdapter(ISqlCommandFactory factory)

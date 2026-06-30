@@ -23,19 +23,19 @@ namespace CrudDatastore.Samples.Adapters.Oracle
         private static IOracleCommandFactory _factory;
 
         public OracleClientCrudAdapter(string connectionString)
-            : this(new ConnectionStringOracleCommandFactory(connectionString), GetTableName())
+            : this(new OracleCommandFactory(connectionString), GetTableName())
         { }
 
         public OracleClientCrudAdapter(string connectionString, string tableName)
-            : this(new ConnectionStringOracleCommandFactory(connectionString), tableName, GetPropertyKey())
+            : this(new OracleCommandFactory(connectionString), tableName, GetPropertyKey())
         { }
 
         public OracleClientCrudAdapter(string connectionString, string tableName, Expression<Func<T, object>> key)
-            : this(new ConnectionStringOracleCommandFactory(connectionString), tableName, key, IsIdentity(GetPropertyKeyName(key)))
+            : this(new OracleCommandFactory(connectionString), tableName, key, IsIdentity(GetPropertyKeyName(key)))
         { }
 
         public OracleClientCrudAdapter(string connectionString, string tableName, Expression<Func<T, object>> key, bool isIdentity)
-            : this(new ConnectionStringOracleCommandFactory(connectionString), tableName, GetPropertyKeyName(key), isIdentity)
+            : this(new OracleCommandFactory(connectionString), tableName, GetPropertyKeyName(key), isIdentity)
         { }
 
         public OracleClientCrudAdapter(IOracleCommandFactory factory)

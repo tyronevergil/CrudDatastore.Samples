@@ -2,11 +2,11 @@ using System.Data.SqlClient;
 
 namespace CrudDatastore.Samples.Adapters.Sql
 {
-    public class ConnectionStringSqlCommandFactory : ISqlCommandFactory
+    public class SqlCommandFactory : ISqlCommandFactory
     {
         private readonly string _connectionString;
 
-        public ConnectionStringSqlCommandFactory(string connectionString)
+        public SqlCommandFactory(string connectionString)
         {
             _connectionString = connectionString;
         }
