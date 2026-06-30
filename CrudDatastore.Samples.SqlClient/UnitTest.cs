@@ -1,15 +1,13 @@
-using System;
 using System.Linq;
-using CrudDatastore.Samples.SqlClient;
 using CrudDatastore.Samples.SqlClient.Entities;
 using NUnit.Framework;
 
 namespace CrudDatastore.Samples.SqlClient
 {
-    [TestFixture()]
-    public class Test
+    [TestFixture]
+    public class UnitTest
     {
-        [Test()]
+        [Test]
         public void CreateAction()
         {
             using (var context = DataContext.Factory())
@@ -28,7 +26,7 @@ namespace CrudDatastore.Samples.SqlClient
             }
         }
 
-        [Test()]
+        [Test]
         public void UpdateAction()
         {
             using (var context = DataContext.Factory())
@@ -43,7 +41,7 @@ namespace CrudDatastore.Samples.SqlClient
             }
         }
 
-        [Test()]
+        [Test]
         public void DeleteAction()
         {
             using (var context = DataContext.Factory())
@@ -57,7 +55,7 @@ namespace CrudDatastore.Samples.SqlClient
             }
         }
 
-        [Test()]
+        [Test]
         public void FindAction()
         {
             using (var context = DataContext.Factory())

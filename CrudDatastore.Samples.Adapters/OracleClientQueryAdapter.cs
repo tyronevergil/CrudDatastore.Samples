@@ -84,7 +84,7 @@ namespace CrudDatastore.Samples.Adapters.Oracle
 
                 using (OracleDataReader dr = command.ExecuteReader())
                 {
-                    if (dr.HasRows || true)
+                    if (dr.HasRows)
                     {
                         while (dr.Read())
                         {
@@ -107,7 +107,7 @@ namespace CrudDatastore.Samples.Adapters.Oracle
         }
 
         /* https://gist.github.com/ryanohs/57b8c85af4f766d9c308bb58af5d68b1 */
-        public class WhereBuilder
+        private class WhereBuilder
         {
             public WherePart ToSql(Expression<Func<T, bool>> expression)
             {
@@ -348,7 +348,7 @@ namespace CrudDatastore.Samples.Adapters.Oracle
             }
         }
 
-        public class WherePart
+        private class WherePart
         {
             public string Sql { get; set; }
             public Dictionary<string, object> Parameters { get; set; } = new Dictionary<string, object>();

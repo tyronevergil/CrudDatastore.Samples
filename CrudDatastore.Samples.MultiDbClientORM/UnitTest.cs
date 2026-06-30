@@ -1,16 +1,14 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using CrudDatastore.Samples.MultiDbClientORM;
 using CrudDatastore.Samples.MultiDbClientORM.Entities;
 using NUnit.Framework;
 
 namespace CrudDatastore.Samples.MultiDbClientORM
 {
-    [TestFixture()]
-    public class Test
+    [TestFixture]
+    public class UnitTest
     {
-        [Test()]
+        [Test]
         public void CreateAction()
         {
             using (var context = DataContext.Factory())
@@ -38,7 +36,7 @@ namespace CrudDatastore.Samples.MultiDbClientORM
             }
         }
 
-        [Test()]
+        [Test]
         public void UpdateAction()
         {
             using (var context = DataContext.Factory())
@@ -61,7 +59,7 @@ namespace CrudDatastore.Samples.MultiDbClientORM
             }
         }
 
-        [Test()]
+        [Test]
         public void DeleteAction()
         {
             using (var context = DataContext.Factory())
@@ -75,7 +73,7 @@ namespace CrudDatastore.Samples.MultiDbClientORM
             }
         }
 
-        [Test()]
+        [Test]
         public void FindAction()
         {
             using (var context = DataContext.Factory())
