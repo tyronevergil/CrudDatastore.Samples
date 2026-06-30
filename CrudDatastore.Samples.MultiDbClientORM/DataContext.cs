@@ -14,8 +14,12 @@ namespace CrudDatastore.Samples.MultiDbClientORM
 
         public static DataContext Factory()
         {
-            //return new DataContext(new MultiDbClientUnitOfWork(<sqlClientConnectionString>, <oracleClientConnectionString>));
             return new DataContext(new InMemoryUnitOfWork());
+        }
+
+        public static DataContext Factory(string sqlClientConnectionString, string oracleClientConnectionString)
+        {
+            return new DataContext(new MultiDbClientUnitOfWork(sqlClientConnectionString, oracleClientConnectionString));
         }
     }
 
@@ -30,7 +34,7 @@ namespace CrudDatastore.Samples.MultiDbClientORM
         {
             return context.FindSingle(new Specification<T>(predicate));
         }
-
     }
 }
+
 

@@ -29,6 +29,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
     <Reference Include="System.Transactions" />
     <Reference Include="nunit.framework">
@@ -43,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Test.cs" />
+    <Compile Include="IntegrationTest.cs" />
     <Compile Include="DataContext.cs" />
     <Compile Include="MultiDbClientUnitOfWork.cs" />
     <Compile Include="Entities\Identification.cs" />

@@ -14,8 +14,12 @@ namespace CrudDatastore.Samples.SqlClient
 
         public static DataContext Factory()
         {
-            //return new DataContext(new SqlClientUnitOfWork(<connectionstring>));
             return new DataContext(new InMemoryUnitOfWork());
+        }
+
+        public static DataContext Factory(string connectionString)
+        {
+            return new DataContext(new SqlClientUnitOfWork(connectionString));
         }
     }
 
@@ -32,4 +36,5 @@ namespace CrudDatastore.Samples.SqlClient
         }
     }
 }
+
 

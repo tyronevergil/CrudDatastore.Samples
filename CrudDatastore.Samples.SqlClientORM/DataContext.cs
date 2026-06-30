@@ -14,8 +14,12 @@ namespace CrudDatastore.Samples.SqlClientORM
 
         public static DataContext Factory()
         {
-            //return new DataContext(new SqlClientUnitOfWork(<connectionstring>));
             return new DataContext(new InMemoryUnitOfWork());
+        }
+
+        public static DataContext Factory(string connectionString)
+        {
+            return new DataContext(new SqlClientUnitOfWork(connectionString));
         }
     }
 
@@ -30,7 +34,7 @@ namespace CrudDatastore.Samples.SqlClientORM
         {
             return context.FindSingle(new Specification<T>(predicate));
         }
-
     }
 }
+
 
