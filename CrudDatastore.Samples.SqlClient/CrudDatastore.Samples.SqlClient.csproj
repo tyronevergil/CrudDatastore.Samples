@@ -40,15 +40,18 @@
     <Compile Include="Test.cs" />
     <Compile Include="DataContext.cs" />
     <Compile Include="DataStoreConfig.cs" />
-    <Compile Include="SqlClientCrudAdapter.cs" />
-    <Compile Include="SqlClientQueryAdapter.cs" />
     <Compile Include="Entities\Identification.cs" />
     <Compile Include="Entities\Person.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\CrudDatastore.Samples.Adapters\CrudDatastore.Samples.Adapters.csproj">
+      <Project>{D51DE466-37CA-4947-9A1E-106DF410C8EC}</Project>
+      <Name>CrudDatastore.Samples.Adapters</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\NUnit3TestAdapter.6.2.0\build\net462\NUnit3TestAdapter.targets" Condition="Exists('..\packages\NUnit3TestAdapter.6.2.0\build\net462\NUnit3TestAdapter.targets')" />
 </Project>

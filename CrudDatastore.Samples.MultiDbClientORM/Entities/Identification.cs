@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using CrudDatastore;
 
-namespace CrudDatastore.MultiDbClientORM.Entities
+namespace CrudDatastore.Samples.MultiDbClientORM.Entities
 {
     public class Identification : EntityBase
     {
@@ -11,3 +11,4 @@ namespace CrudDatastore.MultiDbClientORM.Entities
         public string Number { get; set; }
     }
 }
+

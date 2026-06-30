@@ -36,8 +36,10 @@
 	</Reference>
   </ItemGroup>
   <ItemGroup>
+	<Compile Include="ConnectionStringSqlCommandFactory.cs" />
 	<Compile Include="ISqlCommandFactory.cs" />
 	<Compile Include="SqlClientCrudAdapter.cs" />
+	<Compile Include="SqlClientQueryAdapter.cs" />
 	<Compile Include="OracleClientCrudAdapter.cs" />
   </ItemGroup>
   <ItemGroup />

@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Transactions;
 using CrudDatastore.Framework;
-using CrudDatastore.MultiDbClientORM.Entities;
+using CrudDatastore.Samples.MultiDbClientORM.Entities;
 using CrudDatastore.Samples.Adapters.Oracle;
 using CrudDatastore.Samples.Adapters.Sql;
 
-namespace CrudDatastore.MultiDbClientORM
+namespace CrudDatastore.Samples.MultiDbClientORM
 {
     public class MultiDbClientUnitOfWork : UnitOfWorkBase
     {
@@ -29,3 +29,4 @@ namespace CrudDatastore.MultiDbClientORM
         }
     }
 }
+

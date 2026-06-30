@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Linq.Expressions;
@@ -10,7 +11,7 @@ using System.Text;
 using CrudDatastore;
 using CrudDatastore.Framework;
 
-namespace CrudDatastore.SqlClient
+namespace CrudDatastore.Samples.Adapters.Sql
 {
     public class SqlClientQueryAdapter<T> : DelegateQueryAdapter<T> where T : EntityBase, new()
     {
@@ -19,13 +20,21 @@ namespace CrudDatastore.SqlClient
         private static IEnumerable<string> _fieldList;
         private static string _selectCommand;
 
-        private static string _connectionString;
+        private static ISqlCommandFactory _factory;
 
         public SqlClientQueryAdapter(string connectionString)
-            : this(connectionString, GetTableName())
+            : this(new ConnectionStringSqlCommandFactory(connectionString), GetTableName())
         { }
 
         public SqlClientQueryAdapter(string connectionString, string tableName)
+            : this(new ConnectionStringSqlCommandFactory(connectionString), tableName)
+        { }
+
+        public SqlClientQueryAdapter(ISqlCommandFactory factory)
+            : this(factory, GetTableName())
+        { }
+
+        public SqlClientQueryAdapter(ISqlCommandFactory factory, string tableName)
             : base
             (
                 /* read */
@@ -38,7 +47,7 @@ namespace CrudDatastore.SqlClient
 
                 (sql, parameters) =>
                 {
-                    var paramInDictionary = parameters.Select((Value, i) => new { Key = i.ToString(), Value}).ToDictionary(p => p.Key, p => p.Value);
+                    var paramInDictionary = parameters.Select((Value, i) => new { Key = i.ToString(), Value }).ToDictionary(p => p.Key, p => p.Value);
                     return ExecuteQuery(sql, paramInDictionary);
                 }
             )
@@ -50,7 +59,7 @@ namespace CrudDatastore.SqlClient
                 _selectCommand = string.Format("SELECT {1} FROM [{0}]", tableName,
                     string.Join(", ", _fieldList.Select(f => string.Format("[{0}]", f))));
 
-                _connectionString = connectionString;
+                _factory = factory;
             }
         }
 
@@ -59,36 +68,35 @@ namespace CrudDatastore.SqlClient
             return typeof(T).Name;
         }
 
-        private static IQueryable<T> ExecuteQuery(string sql, IDictionary<string, object> parameters) 
+        private static IQueryable<T> ExecuteQuery(string sql, IDictionary<string, object> parameters)
         {
             var data = new List<T>();
-            using (var connection = new SqlConnection(_connectionString))
+            using (var command = _factory.CreateSqlCommand())
             {
-                using (var command = new SqlCommand(sql, connection))
+                command.CommandText = sql;
+                command.CommandType = CommandType.Text;
+
+                foreach (var param in parameters)
                 {
-                    foreach (var param in parameters)
-                    {
-                        command.Parameters.AddWithValue(string.Format("@{0}", param.Key), param.Value ?? DBNull.Value);
-                    }
+                    command.Parameters.AddWithValue(string.Format("@{0}", param.Key), param.Value ?? DBNull.Value);
+                }
 
-                    connection.Open();
-                    using (SqlDataReader dr = command.ExecuteReader())
+                using (SqlDataReader dr = command.ExecuteReader())
+                {
+                    if (dr.HasRows)
                     {
-                        if (dr.HasRows)
+                        while (dr.Read())
                         {
-                            while (dr.Read())
+                            var t = typeof(T);
+                            var entry = new T();
+                            foreach (var field in _fieldList)
                             {
-                                var t = typeof(T);
-                                var entry = new T();                                
-                                foreach (var field in _fieldList)
-                                {
-                                    var value = dr.GetValue(dr.GetOrdinal(field));
-                                    var prop = t.GetProperty(field);
-                                    prop.SetValue(entry, Convert.ChangeType(value is DBNull ? null : value, prop.PropertyType));
-                                }
-
-                                data.Add(entry);
+                                var value = dr.GetValue(dr.GetOrdinal(field));
+                                var prop = t.GetProperty(field);
+                                prop.SetValue(entry, Convert.ChangeType(value is DBNull ? null : value, prop.PropertyType));
                             }
+
+                            data.Add(entry);
                         }
                     }
                 }

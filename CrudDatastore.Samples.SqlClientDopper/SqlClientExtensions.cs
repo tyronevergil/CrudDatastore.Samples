@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Data;
 using System.Data.Linq.Mapping;
 using System.Data.SqlClient;
@@ -8,7 +8,7 @@ using CrudDatastore;
 using CrudDatastore.Framework;
 using CrudDatastore.Samples.Adapters.Sql;
 
-namespace CrudDatastore.SqlClientDopper
+namespace CrudDatastore.Samples.SqlClientDopper
 {
     public static class SqlClientExtensions
     {
@@ -368,3 +368,4 @@ namespace CrudDatastore.SqlClientDopper
         }
     }
 }
+

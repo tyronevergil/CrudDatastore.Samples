@@ -1,10 +1,10 @@
-ï»¿using System;
+using System;
 using System.Collections.Generic;
 using CrudDatastore;
 using CrudDatastore.Framework;
-using CrudDatastore.SqlClientORM.Entities;
+using CrudDatastore.Samples.SqlClientORM.Entities;
 
-namespace CrudDatastore.SqlClientORM
+namespace CrudDatastore.Samples.SqlClientORM
 {
     public class InMemoryUnitOfWork : UnitOfWorkBase
     {
@@ -19,9 +19,9 @@ namespace CrudDatastore.SqlClientORM
 
             var identifications = new List<Identification>
             {
-                new Identification { IdentificationId = 1, PersonId = 1, Type = Identification.Types.SSN, Number = "509â€“515-224" },
-                new Identification { IdentificationId = 2, PersonId = 1, Type = Identification.Types.TIN, Number = "92â€“4267" },
-                new Identification { IdentificationId = 3, PersonId = 2, Type = Identification.Types.SSN, Number = "425â€“428-336" },
+                new Identification { IdentificationId = 1, PersonId = 1, Type = Identification.Types.SSN, Number = "509–515-224" },
+                new Identification { IdentificationId = 2, PersonId = 1, Type = Identification.Types.TIN, Number = "92–4267" },
+                new Identification { IdentificationId = 3, PersonId = 2, Type = Identification.Types.SSN, Number = "425–428-336" },
             };
 
             var dataStorePerson = people.CreateDataStore(p => p.PersonId);
@@ -33,3 +33,4 @@ namespace CrudDatastore.SqlClientORM
         }
     }
 }
+

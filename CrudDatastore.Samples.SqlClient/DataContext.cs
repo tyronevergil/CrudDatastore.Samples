@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Linq.Expressions;
 using CrudDatastore;
 
-namespace CrudDatastore.SqlClient
+namespace CrudDatastore.Samples.SqlClient
 {
     public class DataContext : DataContextBase
     {
@@ -32,3 +32,4 @@ namespace CrudDatastore.SqlClient
         }
     }
 }
+

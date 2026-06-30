@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Data.Linq.Mapping;
 using CrudDatastore;
 
-namespace CrudDatastore.SqlClientDopper.Entities
+namespace CrudDatastore.Samples.SqlClientDopper.Entities
 {
     [Table(Name = "People")]
     public class Person : EntityBase
@@ -14,3 +14,4 @@ namespace CrudDatastore.SqlClientDopper.Entities
         public string Lastname { get; set; }
     }
 }
+

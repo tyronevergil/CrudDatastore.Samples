@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.Data.SqlClient;
 using CrudDatastore.Framework;
 using CrudDatastore.Samples.Adapters.Sql;
-using CrudDatastore.SqlClientORM.Entities;
+using CrudDatastore.Samples.SqlClientORM.Entities;
 
-namespace CrudDatastore.SqlClientORM
+namespace CrudDatastore.Samples.SqlClientORM
 {
     public class SqlClientUnitOfWork : UnitOfWorkBase, ISqlCommandFactory
     {
@@ -115,3 +115,4 @@ namespace CrudDatastore.SqlClientORM
         }
     }
 }
+

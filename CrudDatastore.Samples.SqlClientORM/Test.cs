@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using CrudDatastore.SqlClientORM;
-using CrudDatastore.SqlClientORM.Entities;
+using CrudDatastore.Samples.SqlClientORM;
+using CrudDatastore.Samples.SqlClientORM.Entities;
 using NUnit.Framework;
 
-namespace CrudDatastore.SqlClientORM
+namespace CrudDatastore.Samples.SqlClientORM
 {
     [TestFixture()]
     public class Test
@@ -87,3 +87,4 @@ namespace CrudDatastore.SqlClientORM
         }
     }
 }
+

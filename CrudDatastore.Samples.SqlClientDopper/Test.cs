@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Data.SqlClient;
 using System.Linq;
-using CrudDatastore.SqlClientDopper;
-using CrudDatastore.SqlClientDopper.Entities;
+using CrudDatastore.Samples.SqlClientDopper;
+using CrudDatastore.Samples.SqlClientDopper.Entities;
 using NUnit.Framework;
 
-namespace CrudDatastore.SqlClientDopper
+namespace CrudDatastore.Samples.SqlClientDopper
 {
     [TestFixture()]
     public class Test
@@ -67,3 +67,4 @@ namespace CrudDatastore.SqlClientDopper
         }
     }
 }
+

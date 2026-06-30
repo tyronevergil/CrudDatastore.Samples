@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using CrudDatastore.MultiDbClientORM;
-using CrudDatastore.MultiDbClientORM.Entities;
+using CrudDatastore.Samples.MultiDbClientORM;
+using CrudDatastore.Samples.MultiDbClientORM.Entities;
 using NUnit.Framework;
 
-namespace CrudDatastore.MultiDbClientORM
+namespace CrudDatastore.Samples.MultiDbClientORM
 {
     [TestFixture()]
     public class Test
@@ -87,3 +87,4 @@ namespace CrudDatastore.MultiDbClientORM
         }
     }
 }
+

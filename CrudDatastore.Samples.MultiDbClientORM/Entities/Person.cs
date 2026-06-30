@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using CrudDatastore;
 
-namespace CrudDatastore.MultiDbClientORM.Entities
+namespace CrudDatastore.Samples.MultiDbClientORM.Entities
 {
     public class Person : EntityBase
     {
@@ -12,3 +12,4 @@ namespace CrudDatastore.MultiDbClientORM.Entities
         public virtual ICollection<Identification> Identifications { get; set; }
     }
 }
+

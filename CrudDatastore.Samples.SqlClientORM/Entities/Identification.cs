@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using CrudDatastore;
 
-namespace CrudDatastore.SqlClientORM.Entities
+namespace CrudDatastore.Samples.SqlClientORM.Entities
 {
     public class Identification : EntityBase
     {
@@ -17,3 +17,4 @@ namespace CrudDatastore.SqlClientORM.Entities
         }
     }
 }
+

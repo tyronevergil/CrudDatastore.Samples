@@ -3,19 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrudDatastore.Samples.Adapters", "CrudDatastore.Samples.Adapters\CrudDatastore.Samples.Adapters.csproj", "{D51DE466-37CA-4947-9A1E-106DF410C8EC}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CrudDatastore.Samples.SqlClient", "CrudDatastore.Samples.SqlClient", "{E1BD5F46-2411-A9D0-09CB-C0A08C7D41CD}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrudDatastore.Samples.SqlClient", "CrudDatastore.Samples.SqlClient\CrudDatastore.Samples.SqlClient.csproj", "{7D253990-B4C6-4A38-BD37-8FBA133095D3}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CrudDatastore.Samples.SqlClientORM", "CrudDatastore.Samples.SqlClientORM", "{D51B1D03-1863-282A-E0C2-1C5AA67FA95F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrudDatastore.Samples.SqlClientORM", "CrudDatastore.Samples.SqlClientORM\CrudDatastore.Samples.SqlClientORM.csproj", "{81C0FB32-522E-4E5C-A1C8-D645EAD160DA}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CrudDatastore.Samples.MultiDbClientORM", "CrudDatastore.Samples.MultiDbClientORM", "{4C340978-5C0B-15AD-E2F3-26AC0D3A9272}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrudDatastore.Samples.MultiDbClientORM", "CrudDatastore.Samples.MultiDbClientORM\CrudDatastore.Samples.MultiDbClientORM.csproj", "{5E272D5D-F3FC-4505-9BED-A1C8BFB6CD4E}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CrudDatastore.Samples.SqlClientDopper", "CrudDatastore.Samples.SqlClientDopper", "{C74EBE22-3EBC-5CF2-DCE9-3A20CDFC0C9F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrudDatastore.Samples.SqlClientDopper", "CrudDatastore.Samples.SqlClientDopper\CrudDatastore.Samples.SqlClientDopper.csproj", "{F388F1C4-C9F7-4441-B3C4-A958F0495CFF}"
 EndProject
@@ -115,12 +107,7 @@ Global
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{7D253990-B4C6-4A38-BD37-8FBA133095D3} = {E1BD5F46-2411-A9D0-09CB-C0A08C7D41CD}
-		{81C0FB32-522E-4E5C-A1C8-D645EAD160DA} = {D51B1D03-1863-282A-E0C2-1C5AA67FA95F}
-		{5E272D5D-F3FC-4505-9BED-A1C8BFB6CD4E} = {4C340978-5C0B-15AD-E2F3-26AC0D3A9272}
-		{F388F1C4-C9F7-4441-B3C4-A958F0495CFF} = {C74EBE22-3EBC-5CF2-DCE9-3A20CDFC0C9F}
-	EndGlobalSection
 EndGlobal
+
 
 

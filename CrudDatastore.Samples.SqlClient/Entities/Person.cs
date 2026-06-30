@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using CrudDatastore;
 
-namespace CrudDatastore.SqlClient.Entities
+namespace CrudDatastore.Samples.SqlClient.Entities
 {
     public class Person : EntityBase
     {
@@ -11,3 +11,4 @@ namespace CrudDatastore.SqlClient.Entities
         public string Lastname { get; set; }
     }
 }
+
