@@ -39,7 +39,8 @@
   <ItemGroup>
     <Compile Include="Test.cs" />
     <Compile Include="DataContext.cs" />
-    <Compile Include="DataStoreConfig.cs" />
+    <Compile Include="InMemoryUnitOfWork.cs" />
+    <Compile Include="SqlClientUnitOfWork.cs" />
     <Compile Include="Entities\Identification.cs" />
     <Compile Include="Entities\Person.cs" />
   </ItemGroup>
