@@ -36,6 +36,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="OracleClientCrudAdapter.cs" />
+    <Compile Include="OracleClientQueryAdapter.cs" />
+    <Compile Include="SqlClientCrudAdapter.cs" />
+    <Compile Include="SqlClientQueryAdapter.cs" />
     <Compile Include="Sql\ISqlCommandFactory.cs" />
     <Compile Include="Sql\SqlCommandFactory.cs" />
     <Compile Include="Sql\SqlClientCrudAdapter.cs" />

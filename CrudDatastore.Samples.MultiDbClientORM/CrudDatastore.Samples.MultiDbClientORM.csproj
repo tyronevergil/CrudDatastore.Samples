@@ -43,6 +43,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Test.cs" />
     <Compile Include="UnitTest.cs" />
     <Compile Include="IntegrationTest.cs" />
     <Compile Include="DataContext.cs" />
@@ -63,4 +64,5 @@
       <Project>{D51DE466-37CA-4947-9A1E-106DF410C8EC}</Project>
       <Name>CrudDatastore.Samples.Adapters</Name>
     </ProjectReference>
-  </ItemGroup></Project>
+  </ItemGroup>
+</Project>

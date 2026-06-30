@@ -38,6 +38,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Test.cs" />
     <Compile Include="UnitTest.cs" />
     <Compile Include="IntegrationTest.cs" />
     <Compile Include="DataContext.cs" />
