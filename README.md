@@ -103,8 +103,30 @@ SqlClient/
 Extends the basic pattern with **navigation properties** and a **shared transaction**
 across all stores in a single `Commit()`.
 
-The `SqlClientUnitOfWork` implements `ISqlCommandFactory` so all adapters share one
-`SqlConnection`/`SqlTransaction` during a commit, giving atomic multi-table writes.
+#### What is the shared transaction?
+
+In `SqlClient`, each adapter opens and closes its own `SqlConnection` per command.
+That means a `SaveChanges()` that writes to multiple tables uses separate, independent
+connections — if the second write fails, the first one has already committed.
+
+`SqlClientORM` solves this by making the `SqlClientUnitOfWork` itself implement
+`ISqlCommandFactory`. When `Commit()` is called it opens **one** `SqlConnection`,
+starts a `SqlTransaction`, and passes both to every adapter via `CreateSqlCommand()`.
+All writes share that single connection and transaction, so they all commit or all roll
+back together.
+
+```
+SaveChanges()
+  └─ Commit()
+	   ├─ open one SqlConnection
+	   ├─ BeginTransaction()
+	   ├─ INSERT/UPDATE/DELETE Person    ← same connection + transaction
+	   ├─ INSERT/UPDATE/DELETE Identification ← same connection + transaction
+	   └─ Commit()  (or Rollback() on error)
+```
+
+Outside of `Commit()` (reads, individual adapter calls) each command still gets its
+own short-lived connection — same as `SqlClient`.
 
 **Unit of work setup**
 
@@ -112,7 +134,7 @@ The `SqlClientUnitOfWork` implements `ISqlCommandFactory` so all adapters share 
 // In-memory (default)
 DataContext.Factory()
 
-// SQL Server (shared transaction)
+// SQL Server (shared transaction on commit)
 DataContext.Factory("Server=localhost;Database=CrudDatastoreTest;...")
 ```
 
@@ -157,7 +179,7 @@ SqlClientORM/
 │   ├── Person.cs             ← has List<Identification> Identifications
 │   └── Identification.cs
 ├── InMemoryUnitOfWork.cs     ← seeds data and maps navigation property
-├── SqlClientUnitOfWork.cs    ← implements ISqlCommandFactory for shared tx
+├── SqlClientUnitOfWork.cs    ← implements ISqlCommandFactory; shared tx on Commit()
 ├── DataContext.cs
 ├── UnitTest.cs
 └── IntegrationTest.cs
@@ -289,30 +311,6 @@ MultiDbClientORM/
 ├── UnitTest.cs
 └── IntegrationTest.cs
 ```
-
----
-
-## Shared adapters
-
-`CrudDatastore.Samples.Adapters` is referenced by all four projects and provides:
-
-```
-Adapters/
-├── Sql/
-│   ├── ISqlCommandFactory.cs       ← abstraction over SqlCommand creation
-│   ├── SqlCommandFactory.cs        ← default: new SqlConnection per command
-│   ├── SqlClientCrudAdapter.cs     ← DelegateCrudAdapter<T> for SQL Server
-│   └── SqlClientQueryAdapter.cs    ← predicate → WHERE clause translation
-└── Oracle/
-	├── IOracleCommandFactory.cs
-	├── OracleCommandFactory.cs
-	├── OracleClientCrudAdapter.cs
-	└── OracleClientQueryAdapter.cs
-```
-
-The factory abstraction (`ISqlCommandFactory` / `IOracleCommandFactory`) lets adapters
-work with either a standalone connection (`SqlCommandFactory`) or a shared transactional
-connection (e.g. `SqlClientORM`'s `SqlClientUnitOfWork : ISqlCommandFactory`).
 
 ---
 
