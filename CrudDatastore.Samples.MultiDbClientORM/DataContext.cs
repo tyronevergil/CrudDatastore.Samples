@@ -1,6 +1,3 @@
-using System;
-using System.Linq;
-using System.Linq.Expressions;
 using CrudDatastore;
 
 namespace CrudDatastore.Samples.MultiDbClientORM
@@ -20,19 +17,6 @@ namespace CrudDatastore.Samples.MultiDbClientORM
         public static DataContext Factory(string sqlClientConnectionString, string oracleClientConnectionString)
         {
             return new DataContext(new MultiDbClientUnitOfWork(sqlClientConnectionString, oracleClientConnectionString));
-        }
-    }
-
-    public static class DataContextExtentions
-    {
-        public static IQueryable<T> Find<T>(this DataContextBase context, Expression<Func<T, bool>> predicate) where T : EntityBase
-        {
-            return context.Find(new Specification<T>(predicate));
-        }
-
-        public static T FindSingle<T>(this DataContextBase context, Expression<Func<T, bool>> predicate) where T : EntityBase
-        {
-            return context.FindSingle(new Specification<T>(predicate));
         }
     }
 }
