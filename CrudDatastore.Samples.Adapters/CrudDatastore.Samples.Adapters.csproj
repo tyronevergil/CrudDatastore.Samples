@@ -37,10 +37,13 @@
   </ItemGroup>
   <ItemGroup>
 	<Compile Include="ConnectionStringSqlCommandFactory.cs" />
+	<Compile Include="ConnectionStringOracleCommandFactory.cs" />
+	<Compile Include="IOracleCommandFactory.cs" />
 	<Compile Include="ISqlCommandFactory.cs" />
 	<Compile Include="SqlClientCrudAdapter.cs" />
 	<Compile Include="SqlClientQueryAdapter.cs" />
 	<Compile Include="OracleClientCrudAdapter.cs" />
+	<Compile Include="OracleClientQueryAdapter.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
