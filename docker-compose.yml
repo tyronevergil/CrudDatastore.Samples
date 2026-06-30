@@ -1,0 +1,56 @@
+version: '3.8'
+
+# ---------------------------------------------------------------------------
+# CrudDatastore.Samples – local integration-test databases
+#
+# Usage:
+#   docker-compose up -d
+#   (then fill in App.config connection strings – see INTEGRATION-TESTING.md)
+#
+# SQL Server  →  localhost,1433
+#                Server=localhost,1433;Database=CrudDatastoreTest;User Id=sa;Password=CrudSamples!Pass1;TrustServerCertificate=True;
+#
+# Oracle XE   →  localhost:1521  (service XEPDB1, user crudtest)
+#                User Id=crudtest;Password=CrudSamples1;Data Source=localhost:1521/XEPDB1;
+# ---------------------------------------------------------------------------
+
+services:
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: cruddatastore-sqlserver
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "CrudSamples!Pass1"
+    ports:
+      - "1433:1433"
+    volumes:
+      - ./Scripts:/scripts:ro
+      - ./Scripts/docker/sqlserver-entrypoint.sh:/usr/local/bin/sqlserver-entrypoint.sh:ro
+    entrypoint: ["/bin/bash", "/usr/local/bin/sqlserver-entrypoint.sh"]
+    healthcheck:
+      test: ["CMD-SHELL",
+             "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'CrudSamples!Pass1' -Q 'SELECT 1' -b -C || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  oracle:
+    image: gvenzl/oracle-xe:21-slim
+    container_name: cruddatastore-oracle
+    environment:
+      ORACLE_PASSWORD: "CrudSamples1"
+      ORACLE_DATABASE: "XEPDB1"
+    ports:
+      - "1521:1521"
+    volumes:
+      # 01 – create app user, 02 – create schema tables (runs in order)
+      - ./Scripts/docker/oracle-create-user.sql:/container-entrypoint-initdb.d/01-create-user.sql:ro
+      - ./Scripts/Oracle.sql:/container-entrypoint-initdb.d/02-schema.sql:ro
+    healthcheck:
+      test: ["CMD", "healthcheck.sh"]
+      interval: 20s
+      timeout: 10s
+      retries: 15
+      start_period: 60s

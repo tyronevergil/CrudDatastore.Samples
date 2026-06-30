@@ -402,4 +402,9 @@ ASALocalRun/
 .mfractor/
 
 # Local History for Visual Studio
+
+# App.config files contain local connection strings for integration tests.
+# The checked-in versions have empty values and are safe to keep tracked.
+# If you fill them in locally, prevent accidental commits with:
+#   git update-index --assume-unchanged **/App.config
 .localhistory/
