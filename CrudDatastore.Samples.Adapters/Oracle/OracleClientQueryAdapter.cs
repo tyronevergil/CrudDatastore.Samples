@@ -22,14 +22,6 @@ namespace CrudDatastore.Samples.Adapters.Oracle
 
         private static IOracleCommandFactory _factory;
 
-        public OracleClientQueryAdapter(string connectionString)
-            : this(new OracleCommandFactory(connectionString), GetTableName())
-        { }
-
-        public OracleClientQueryAdapter(string connectionString, string tableName)
-            : this(new OracleCommandFactory(connectionString), tableName)
-        { }
-
         public OracleClientQueryAdapter(IOracleCommandFactory factory)
             : this(factory, GetTableName())
         { }

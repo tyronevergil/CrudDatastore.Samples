@@ -37,11 +37,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Sql\ISqlCommandFactory.cs" />
-    <Compile Include="Sql\SqlCommandFactory.cs" />
     <Compile Include="Sql\SqlClientCrudAdapter.cs" />
     <Compile Include="Sql\SqlClientQueryAdapter.cs" />
     <Compile Include="Oracle\IOracleCommandFactory.cs" />
-    <Compile Include="Oracle\OracleCommandFactory.cs" />
     <Compile Include="Oracle\OracleClientCrudAdapter.cs" />
     <Compile Include="Oracle\OracleClientQueryAdapter.cs" />
   </ItemGroup>

@@ -22,14 +22,6 @@ namespace CrudDatastore.Samples.Adapters.Sql
 
         private static ISqlCommandFactory _factory;
 
-        public SqlClientQueryAdapter(string connectionString)
-            : this(new SqlCommandFactory(connectionString), GetTableName())
-        { }
-
-        public SqlClientQueryAdapter(string connectionString, string tableName)
-            : this(new SqlCommandFactory(connectionString), tableName)
-        { }
-
         public SqlClientQueryAdapter(ISqlCommandFactory factory)
             : this(factory, GetTableName())
         { }

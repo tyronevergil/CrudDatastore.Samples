@@ -1,21 +1,41 @@
+using System.Data.SqlClient;
 using System.Transactions;
 using CrudDatastore.Framework;
 using CrudDatastore.Samples.MultiDbClientORM.Entities;
 using CrudDatastore.Samples.Adapters.Oracle;
 using CrudDatastore.Samples.Adapters.Sql;
+using Oracle.ManagedDataAccess.Client;
 
 namespace CrudDatastore.Samples.MultiDbClientORM
 {
-    public class MultiDbClientUnitOfWork : UnitOfWorkBase
+    public class MultiDbClientUnitOfWork : UnitOfWorkBase, ISqlCommandFactory, IOracleCommandFactory
     {
+        private readonly string _sqlClientConnectionString;
+        private readonly string _oracleClientConnectionString;
+
         public MultiDbClientUnitOfWork(string sqlClientConnectionString, string oracleClientConnectionString)
         {
-            var dataStorePerson = new DataStore<Person>(new SqlClientCrudAdapter<Person>(sqlClientConnectionString, "People", p => p.PersonId));
-            var dataStoreIdentification = new DataStore<Identification>(new OracleClientCrudAdapter<Identification>(oracleClientConnectionString, "Identifications", p => p.IdentificationId));
+            _sqlClientConnectionString = sqlClientConnectionString;
+            _oracleClientConnectionString = oracleClientConnectionString;
+
+            var dataStorePerson = new DataStore<Person>(new SqlClientCrudAdapter<Person>(this, "People", p => p.PersonId));
+            var dataStoreIdentification = new DataStore<Identification>(new OracleClientCrudAdapter<Identification>(this, "Identifications", p => p.IdentificationId));
 
             this.Register(dataStorePerson)
                 .Map(p => p.Identifications, (p, i) => p.PersonId == i.PersonId);
             this.Register(dataStoreIdentification);
+        }
+
+        public System.Data.SqlClient.SqlCommand CreateSqlCommand()
+        {
+            var connection = new SqlConnection(_sqlClientConnectionString);
+            return connection.CreateCommand();
+        }
+
+        public OracleCommand CreateOracleCommand()
+        {
+            var connection = new OracleConnection(_oracleClientConnectionString);
+            return connection.CreateCommand();
         }
 
         public override void Commit()
