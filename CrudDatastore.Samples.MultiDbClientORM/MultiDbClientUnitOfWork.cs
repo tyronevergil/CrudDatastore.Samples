@@ -26,7 +26,7 @@ namespace CrudDatastore.Samples.MultiDbClientORM
             this.Register(dataStoreIdentification);
         }
 
-        public System.Data.SqlClient.SqlCommand CreateSqlCommand()
+        public SqlCommand CreateSqlCommand()
         {
             var connection = new SqlConnection(_sqlClientConnectionString);
             return connection.CreateCommand();
