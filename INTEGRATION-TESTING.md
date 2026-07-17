@@ -60,10 +60,10 @@ dotnet test
 
 ## Test Structure
 
-Each project has two test classes:
+SQL Server projects have unit and integration tests:
 
 | Class | Type | Connection | Runs When |
-|-------|------|-----------|-----------|
+|-------|------|-----------|-----------| 
 | `UnitTest.cs` | In-memory | None required | Always ✅ |
 | `IntegrationTest.cs` | Database | Requires config | Connection string present ✅ |
 
@@ -80,7 +80,7 @@ Each project has two test classes:
 |---------|-----------|--------|-------|
 | **SqlClient** | ✅ | — | Unit + Integration (SQL Server) |
 | **SqlClientORM** | ✅ | — | Unit + Integration (SQL Server) |
-| **SqlClientDopper** | ✅ | — | Unit + Integration (SQL Server) |
+| **SqlClientDopper** | ✅ | — | Integration only (SQL Server) |
 | **MultiDbClientORM** | ✅ | ✅ | Unit + Integration (SQL Server + Oracle) |
 
 ## Stopping Containers
@@ -179,34 +179,3 @@ For automated testing pipelines:
 5. Clean up: `docker-compose down`
 
 See CI/CD pipeline documentation for your specific platform (GitHub Actions, Azure Pipelines, etc.).
-
-## Oracle Free 23 Details
-
-The CrudDatastore.Samples uses the `gvenzl/oracle-free:23-slim` Docker image, which provides Oracle Database Free Edition 23c.
-
-**Default PDB:** `FREEPDB1`  
-**Default User:** `sys`  
-**App User:** `crudtest` (created during initialization)
-
-For more details, see [gvenzl/oracle-free on Docker Hub](https://hub.docker.com/r/gvenzl/oracle-free).
-
-## Line Endings Caveat
-
-SQL Server initialization scripts must use **LF (Unix) line endings**, not CRLF (Windows). The repository includes `.gitattributes` to enforce this, but if you clone on Windows with auto-conversion enabled, you may need to manually convert:
-
-```powershell
-# Fix line endings if needed
-dos2unix Scripts/docker/sqlserver-entrypoint.sh
-```
-
-## Connection Management Caveat
-
-The `SqlClientCrudAdapter` uses a shared connection/transaction model where:
-- One connection per `UnitOfWork` instance
-- One transaction per `ExecuteAsync` call
-- Connections are kept open for adapter reuse
-
-If you add new adapters or modify connection lifecycle, ensure:
-1. Connections are properly disposed
-2. Transactions are committed before the connection closes
-3. Multiple `ExecuteAsync` calls within one `UnitOfWork` share the same transaction
