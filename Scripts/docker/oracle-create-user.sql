@@ -1,14 +1,20 @@
 -- ============================================================
--- Oracle XE bootstrap – creates the application user.
+-- Oracle Free bootstrap – creates the application user.
 -- Runs automatically via /container-entrypoint-initdb.d/
 -- The Oracle.sql schema script runs immediately after.
 -- ============================================================
 
--- gvenzl/oracle-xe sets ORACLE_DATABASE=crudtest which creates
--- a pluggable DB named XEPDB1 with that service name.
--- We create the schema user inside it.
+-- gvenzl/oracle-free creates the default pluggable database
+-- FREEPDB1. We switch into that PDB and create the application
+-- schema user inside it.
+--
+-- NOTE:
+-- Initialization scripts are executed as SYS. Each script runs
+-- in its own session, so Oracle.sql must also switch to FREEPDB1
+-- before creating application tables.
+-- ============================================================
 
-ALTER SESSION SET CONTAINER = XEPDB1;
+ALTER SESSION SET CONTAINER = FREEPDB1;
 
 CREATE USER crudtest IDENTIFIED BY "CrudSamples1"
 	DEFAULT TABLESPACE USERS
@@ -16,3 +22,7 @@ CREATE USER crudtest IDENTIFIED BY "CrudSamples1"
 	QUOTA UNLIMITED ON USERS;
 
 GRANT CONNECT, RESOURCE TO crudtest;
+GRANT CREATE TABLE TO crudtest;
+GRANT CREATE VIEW TO crudtest;
+GRANT CREATE SEQUENCE TO crudtest;
+GRANT CREATE PROCEDURE TO crudtest;

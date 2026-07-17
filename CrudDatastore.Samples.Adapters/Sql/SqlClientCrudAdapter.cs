@@ -4,6 +4,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Threading.Tasks;
 using CrudDatastore;
 using CrudDatastore.Framework;
 
@@ -11,8 +12,6 @@ namespace CrudDatastore.Samples.Adapters.Sql
 {
     public class SqlClientCrudAdapter<T> : DelegateCrudAdapter<T> where T : EntityBase, new()
     {
-        private readonly SqlClientQueryAdapter<T> _queryAdapter;
-
         private static IEnumerable<string> _fieldList;
         private static IEnumerable<string> _fieldListWithoutKey;
 
@@ -21,6 +20,7 @@ namespace CrudDatastore.Samples.Adapters.Sql
         private static string _deleteCommand;
 
         private static ISqlCommandFactory _factory;
+        private static SqlClientQueryAdapter<T> _queryAdapter;
 
         public SqlClientCrudAdapter(ISqlCommandFactory factory)
             : this(factory, GetTableName())
@@ -73,13 +73,13 @@ namespace CrudDatastore.Samples.Adapters.Sql
                 /* read */
                 (predicate) =>
                 {
-                    return Enumerable.Empty<T>().AsQueryable();
+                    return _queryAdapter.Execute(predicate);
                 },
 
                 /* read */
                 (sql, parameters) =>
                 {
-                    return Enumerable.Empty<T>().AsQueryable();
+                    return _queryAdapter.Execute(sql, parameters);
                 }
             )
         {
@@ -99,10 +99,9 @@ namespace CrudDatastore.Samples.Adapters.Sql
 
                 _deleteCommand = string.Format("DELETE [{0}] WHERE {1}", tableName,
                     string.Format("[{0}] = @{0}", keyName));
-
-                _factory = factory;
             }
 
+            _factory = factory;
             _queryAdapter = new SqlClientQueryAdapter<T>(factory, tableName);
         }
 
@@ -154,6 +153,26 @@ namespace CrudDatastore.Samples.Adapters.Sql
             return false;
         }
 
+        public override IQueryable<T> Execute(Expression<Func<T, bool>> predicate)
+        {
+            return _queryAdapter.Execute(predicate);
+        }
+
+        public override IQueryable<T> Execute(string sql, params object[] parameters)
+        {
+            return _queryAdapter.Execute(sql, parameters);
+        }
+
+        public override async Task<IQueryable<T>> ExecuteAsync(Expression<Func<T, bool>> predicate)
+        {
+            return await _queryAdapter.ExecuteAsync(predicate);
+        }
+
+        public override async Task<IQueryable<T>> ExecuteAsync(string sql, params object[] parameters)
+        {
+            return await _queryAdapter.ExecuteAsync(sql, parameters);
+        }
+
         private static object Execute(string sql, IDictionary<string, object> parameters, bool isScalar = false)
         {
             using (var command = _factory.CreateSqlCommand())
@@ -166,20 +185,10 @@ namespace CrudDatastore.Samples.Adapters.Sql
                     command.Parameters.AddWithValue(string.Format("@{0}", param.Key), param.Value ?? DBNull.Value);
                 }
 
-                var ret = isScalar ? command.ExecuteScalar() : command.ExecuteNonQuery();
+                var identity = isScalar ? command.ExecuteScalar() : command.ExecuteNonQuery();
 
-                return ret;
+                return identity;
             }
-        }
-
-        public override IQueryable<T> Execute(Expression<Func<T, bool>> predicate)
-        {
-            return _queryAdapter.Execute(predicate);
-        }
-
-        public override IQueryable<T> Execute(string sql, params object[] parameters)
-        {
-            return _queryAdapter.Execute(sql, parameters);
         }
     }
 }

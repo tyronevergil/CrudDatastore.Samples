@@ -86,7 +86,14 @@ namespace CrudDatastore.Samples.Adapters.Oracle
                             {
                                 var value = dr.GetValue(dr.GetOrdinal(field));
                                 var prop = t.GetProperty(field);
-                                prop.SetValue(entry, Convert.ChangeType(value is DBNull ? null : value, prop.PropertyType));
+
+                                var convertedValue = value is DBNull || value == null
+                                    ? null
+                                    : (prop.PropertyType.IsEnum
+                                        ? Enum.ToObject(prop.PropertyType, value)
+                                        : Convert.ChangeType(value, prop.PropertyType));
+
+                                prop.SetValue(entry, convertedValue);
                             }
 
                             data.Add(entry);

@@ -14,7 +14,7 @@ for i in $(seq 1 30); do
 		echo "SQL Server is up."
 		break
 	fi
-	echo "  attempt $i/30 — waiting 2s..."
+	echo "  attempt $i/30 - waiting 2s..."
 	sleep 2
 done
 

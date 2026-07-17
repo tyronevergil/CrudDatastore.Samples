@@ -50,9 +50,9 @@ namespace CrudDatastore.Samples.Adapters.Sql
 
                 _selectCommand = string.Format("SELECT {1} FROM [{0}]", tableName,
                     string.Join(", ", _fieldList.Select(f => string.Format("[{0}]", f))));
-
-                _factory = factory;
             }
+
+            _factory = factory;
         }
 
         private static string GetTableName()
@@ -63,6 +63,7 @@ namespace CrudDatastore.Samples.Adapters.Sql
         private static IQueryable<T> ExecuteQuery(string sql, IDictionary<string, object> parameters)
         {
             var data = new List<T>();
+
             using (var command = _factory.CreateSqlCommand())
             {
                 command.CommandText = sql;
@@ -85,7 +86,14 @@ namespace CrudDatastore.Samples.Adapters.Sql
                             {
                                 var value = dr.GetValue(dr.GetOrdinal(field));
                                 var prop = t.GetProperty(field);
-                                prop.SetValue(entry, Convert.ChangeType(value is DBNull ? null : value, prop.PropertyType));
+
+                                var convertedValue = value is DBNull || value == null
+                                    ? null
+                                    : (prop.PropertyType.IsEnum
+                                        ? Enum.ToObject(prop.PropertyType, value)
+                                        : Convert.ChangeType(value, prop.PropertyType));
+
+                                prop.SetValue(entry, convertedValue);
                             }
 
                             data.Add(entry);

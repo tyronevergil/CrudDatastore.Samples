@@ -11,8 +11,6 @@ namespace CrudDatastore.Samples.Adapters.Oracle
 {
     public class OracleClientCrudAdapter<T> : DelegateCrudAdapter<T> where T : EntityBase, new()
     {
-        private readonly OracleClientQueryAdapter<T> _queryAdapter;
-
         private static IEnumerable<string> _fieldList;
         private static IEnumerable<string> _fieldListWithoutKey;
 
@@ -21,6 +19,7 @@ namespace CrudDatastore.Samples.Adapters.Oracle
         private static string _deleteCommand;
 
         private static IOracleCommandFactory _factory;
+        private static OracleClientQueryAdapter<T> _queryAdapter;
 
         public OracleClientCrudAdapter(IOracleCommandFactory factory)
             : this(factory, GetTableName())
@@ -73,13 +72,13 @@ namespace CrudDatastore.Samples.Adapters.Oracle
                 /* read */
                 (predicate) =>
                 {
-                    return Enumerable.Empty<T>().AsQueryable();
+                    return _queryAdapter.Execute(predicate);
                 },
 
                 /* read */
                 (sql, parameters) =>
                 {
-                    return Enumerable.Empty<T>().AsQueryable();
+                    return _queryAdapter.Execute(sql, parameters);
                 }
             )
         {
@@ -99,10 +98,9 @@ namespace CrudDatastore.Samples.Adapters.Oracle
 
                 _deleteCommand = string.Format("DELETE \"{0}\" WHERE {1}", tableName,
                     string.Format("\"{0}\" = :\"{0}\"", keyName));
-
-                _factory = factory;
             }
 
+            _factory = factory;
             _queryAdapter = new OracleClientQueryAdapter<T>(factory, tableName);
         }
 
@@ -180,16 +178,6 @@ namespace CrudDatastore.Samples.Adapters.Oracle
 
                 return identity != null ? identity.Value : 0;
             }
-        }
-
-        public override IQueryable<T> Execute(Expression<Func<T, bool>> predicate)
-        {
-            return _queryAdapter.Execute(predicate);
-        }
-
-        public override IQueryable<T> Execute(string sql, params object[] parameters)
-        {
-            return _queryAdapter.Execute(sql, parameters);
         }
     }
 }

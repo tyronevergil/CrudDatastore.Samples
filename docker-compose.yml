@@ -37,11 +37,10 @@ services:
       start_period: 30s
 
   oracle:
-    image: gvenzl/oracle-xe:21-slim
+    image: gvenzl/oracle-free:23-slim
     container_name: cruddatastore-oracle
     environment:
       ORACLE_PASSWORD: "CrudSamples1"
-      ORACLE_DATABASE: "XEPDB1"
     ports:
       - "1521:1521"
     volumes:

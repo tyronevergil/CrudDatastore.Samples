@@ -29,12 +29,14 @@ namespace CrudDatastore.Samples.MultiDbClientORM
         public SqlCommand CreateSqlCommand()
         {
             var connection = new SqlConnection(_sqlClientConnectionString);
+            connection.Open();
             return connection.CreateCommand();
         }
 
         public OracleCommand CreateOracleCommand()
         {
             var connection = new OracleConnection(_oracleClientConnectionString);
+            connection.Open();
             return connection.CreateCommand();
         }
 
