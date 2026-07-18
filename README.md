@@ -15,6 +15,7 @@ All samples target **.NET Framework 4.8.1** and use **CrudDatastore 2.0.0-previe
 | [`SqlClientORM`](#sqlclientorm) | ORM-style CRUD with navigation properties and atomic multi-table commits |
 | [`SqlClientDopper`](#sqlclientdopper) | Extension methods directly on `SqlConnection` |
 | [`MultiDbClientORM`](#multidbclientorm) | ORM-style CRUD spanning SQL Server **and** Oracle in one unit of work |
+| [`EntityFramework`](#entityframework) | EF6 `DbContext`-backed ORM with navigation properties and in-memory testing |
 
 ---
 
@@ -307,6 +308,80 @@ MultiDbClientORM/
 ├── DataContext.cs               ← Factory() / Factory(sqlCs, oracleCs)
 ├── UnitTest.cs
 └── IntegrationTest.cs
+```
+
+---
+
+## EntityFramework
+
+> `CrudDatastore.Samples.EntityFramework`
+
+Demonstrates using **Entity Framework 6.0 DbContext** as the unit of work backend for CrudDatastore,
+with automatic lazy-loading of navigation properties and full transaction support.
+
+#### How it differs from SqlClientORM
+
+- **SqlClientORM** uses hand-rolled SQL adapters and explicit transaction management.
+- **EntityFramework** leverages EF6's `DbContext` to handle change tracking, SQL generation, and navigation property loading automatically.
+- Both follow the same CrudDatastore abstraction layer (`IUnitOfWork`, `IDataStore`), so the tests and usage patterns are identical.
+
+**Unit of work setup**
+
+```csharp
+// In-memory (default — uses DataStore with seeded test data)
+DataContext.Factory()
+
+// SQL Server (uses EF6 DbContext)
+DataContext.Factory("Server=localhost;Database=CrudDatastoreTest;...")
+```
+
+**CRUD with navigation properties**
+
+```csharp
+using (var context = DataContext.Factory())
+{
+	// Create with related entities
+	var person = new Person
+	{
+		Firstname = "Pauline",
+		Lastname  = "Koch",
+		Identifications = new List<Identification>
+		{
+			new Identification { Type = Identification.Types.SSN, Number = "222-222-2222" }
+		}
+	};
+	context.Add(person);
+	context.SaveChanges();
+
+	// Read — Identifications is lazy-loaded by EF
+	var loaded = context.FindSingle<Person>(p => p.PersonId == person.PersonId);
+	var ids    = loaded.Identifications; // List<Identification>
+
+	// Update — add another identification
+	loaded.Identifications.Add(new Identification { Type = Identification.Types.TIN, Number = "333-333" });
+	context.Update(loaded);
+	context.SaveChanges();
+
+	// Delete — cascades to child identifications
+	context.Delete(loaded);
+	context.SaveChanges();
+}
+```
+
+**Key files**
+
+```
+EntityFramework/
+├── Entities/
+│   ├── Person.cs             ← has List<Identification> Identifications
+│   └── Identification.cs
+├── EFUnitOfWork.cs          ← DbContext-based IUnitOfWork implementation; lazy-loads navigation properties
+├── InMemoryUnitOfWork.cs     ← in-memory alternative using DataStore + seeded data
+├── DataContext.cs            ← Factory() / Factory(connectionString)
+├── Specifications/
+│   └── PersonSpecs.cs        ← query helpers
+├── UnitTest.cs               ← in-memory tests
+└── IntegrationTest.cs        ← SQL Server tests (skipped when not configured)
 ```
 
 ---
