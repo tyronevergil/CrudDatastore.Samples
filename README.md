@@ -316,14 +316,9 @@ MultiDbClientORM/
 
 > `CrudDatastore.Samples.EntityFramework`
 
-Demonstrates using **Entity Framework 6.0 DbContext** as the unit of work backend for CrudDatastore,
-with automatic lazy-loading of navigation properties and full transaction support.
-
-#### How it differs from SqlClientORM
-
-- **SqlClientORM** uses hand-rolled SQL adapters and explicit transaction management.
-- **EntityFramework** leverages EF6's `DbContext` to handle change tracking, SQL generation, and navigation property loading automatically.
-- Both follow the same CrudDatastore abstraction layer (`IUnitOfWork`, `IDataStore`), so the tests and usage patterns are identical.
+Demonstrates using **Entity Framework 6.0 DbContext** as the unit of work backend for CrudDatastore.
+EF6 handles change tracking, SQL generation, and navigation property lazy-loading automatically,
+providing a full ORM experience while still integrating with the CrudDatastore abstraction layer.
 
 **Unit of work setup**
 
