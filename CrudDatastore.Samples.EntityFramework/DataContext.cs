@@ -8,6 +8,11 @@ namespace CrudDatastore.Samples.EntityFramework
 {
     public class DataContext : DataContextBase
     {
+        private DataContext(IUnitOfWorkSync unitOfWorkSync)
+            : base(unitOfWorkSync)
+        {
+        }
+
         private DataContext(IUnitOfWork unitOfWork)
             : base(unitOfWork)
         {

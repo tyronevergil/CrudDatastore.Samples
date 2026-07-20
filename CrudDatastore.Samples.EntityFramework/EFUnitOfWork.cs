@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
-using System.Threading.Tasks;
 using CrudDatastore;
 using CrudDatastore.Foundation;
 
@@ -11,9 +10,6 @@ namespace CrudDatastore.Samples.EntityFramework
 {
     public class EFUnitOfWork : EFUnitOfWorkBase
     {
-        public EFUnitOfWork()
-        { }
-
         public EFUnitOfWork(string connectionString)
             : base(connectionString)
         { }
@@ -35,7 +31,7 @@ namespace CrudDatastore.Samples.EntityFramework
         }
     }
 
-    public abstract class EFUnitOfWorkBase : DbContext, IUnitOfWork
+    public abstract class EFUnitOfWorkBase : DbContext, IUnitOfWorkSync
     {
         private readonly IDictionary<Type, object> _dataQueries = new Dictionary<Type, object>();
 
@@ -43,12 +39,6 @@ namespace CrudDatastore.Samples.EntityFramework
         public event EventHandler<EntityEventArgs> EntityCreate;
         public event EventHandler<EntityEventArgs> EntityUpdate;
         public event EventHandler<EntityEventArgs> EntityDelete;
-
-        protected EFUnitOfWorkBase()
-        {
-            Database.SetInitializer<EFUnitOfWorkBase>(null);
-            ((IObjectContextAdapter)this).ObjectContext.ObjectMaterialized += (sender, e) => EntityMaterialized?.Invoke(this, new EntityEventArgs(e.Entity));
-        }
 
         protected EFUnitOfWorkBase(string connectionString)
             : base(connectionString)
@@ -60,11 +50,6 @@ namespace CrudDatastore.Samples.EntityFramework
         public void Execute(string command, params object[] parameters)
         {
             Database.ExecuteSqlCommand(command, parameters);
-        }
-
-        public Task ExecuteAsync(string command, params object[] parameters)
-        {
-            return Database.ExecuteSqlCommandAsync(command, parameters);
         }
 
         public IDataQuery<T> Read<T>() where T : EntityBase
@@ -84,27 +69,11 @@ namespace CrudDatastore.Samples.EntityFramework
             Set<T>().Add(entity);
         }
 
-        public Task MarkNewAsync<T>(T entity) where T : EntityBase
-        {
-            Set<T>().Add(entity);
-
-            return Task.CompletedTask;
-        }
-
         public void MarkModified<T>(T entity) where T : EntityBase
         {
             var entry = Entry(entity);
             if (entry.State == EntityState.Detached || entry.State == EntityState.Unchanged)
                 entry.State = EntityState.Modified;
-        }
-
-        public Task MarkModifiedAsync<T>(T entity) where T : EntityBase
-        {
-            var entry = Entry(entity);
-            if (entry.State == EntityState.Detached || entry.State == EntityState.Unchanged)
-                entry.State = EntityState.Modified;
-
-            return Task.CompletedTask;
         }
 
         public void MarkDeleted<T>(T entity) where T : EntityBase
@@ -114,17 +83,6 @@ namespace CrudDatastore.Samples.EntityFramework
                 Set<T>().Attach(entity);
 
             Set<T>().Remove(entity);
-        }
-
-        public Task MarkDeletedAsync<T>(T entity) where T : EntityBase
-        {
-            var entry = Entry(entity);
-            if (entry.State == EntityState.Detached)
-                Set<T>().Attach(entity);
-
-            Set<T>().Remove(entity);
-
-            return Task.CompletedTask;
         }
 
         public void Commit()
@@ -148,29 +106,6 @@ namespace CrudDatastore.Samples.EntityFramework
             }
 
             SaveChanges();
-        }
-
-        public async Task CommitAsync()
-        {
-            ChangeTracker.DetectChanges();
-
-            foreach (var entry in ChangeTracker.Entries().Where(e => e.State == EntityState.Added || e.State == EntityState.Modified || e.State == EntityState.Deleted))
-            {
-                switch (entry.State)
-                {
-                    case EntityState.Added:
-                        EntityCreate?.Invoke(this, new EntityEventArgs(entry.Entity));
-                        break;
-                    case EntityState.Modified:
-                        EntityUpdate?.Invoke(this, new EntityEventArgs(entry.Entity));
-                        break;
-                    case EntityState.Deleted:
-                        EntityDelete?.Invoke(this, new EntityEventArgs(entry.Entity));
-                        break;
-                }
-            }
-
-            await SaveChangesAsync();
         }
     }
 
