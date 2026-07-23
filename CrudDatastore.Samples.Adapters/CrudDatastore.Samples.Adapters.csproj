@@ -29,7 +29,7 @@
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="CrudDatastore">
-      <HintPath>..\packages\CrudDatastore.2.0.0-preview.1\lib\net481\CrudDatastore.dll</HintPath>
+      <HintPath>..\packages\CrudDatastore.2.0.0-preview.2\lib\net481\CrudDatastore.dll</HintPath>
     </Reference>
     <Reference Include="Oracle.ManagedDataAccess">
       <HintPath>..\packages\Oracle.ManagedDataAccess.18.3.0\lib\net40\Oracle.ManagedDataAccess.dll</HintPath>

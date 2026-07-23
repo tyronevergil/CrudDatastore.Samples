@@ -3,7 +3,7 @@
 Sample projects demonstrating the different ways to use [CrudDatastore](https://github.com/tyronevergil/CrudDatastore)
 — a lightweight datastore and query framework for .NET.
 
-All samples target **.NET Framework 4.8.1** and use **CrudDatastore 2.0.0-preview.1**.
+All samples target **.NET Framework 4.8.1** and use **CrudDatastore 2.0.0-preview.2**.
 
 ---
 
