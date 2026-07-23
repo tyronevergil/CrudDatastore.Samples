@@ -1,7 +1,7 @@
 # CrudDatastore.Samples
 
 Sample projects demonstrating the different ways to use [CrudDatastore](https://github.com/tyronevergil/CrudDatastore)
-— a lightweight datastore and query framework for .NET.
+— a datastore framework for .NET with flexible abstractions for CRUD, querying, and data access.
 
 All samples target **.NET Framework 4.8.1** and use **CrudDatastore 2.0.0-preview.2**.
 
@@ -319,6 +319,51 @@ MultiDbClientORM/
 Demonstrates using **Entity Framework 6.0 DbContext** as the unit of work backend for CrudDatastore.
 EF6 handles change tracking, SQL generation, and navigation property lazy-loading automatically,
 providing a full ORM experience while still integrating with the CrudDatastore abstraction layer.
+
+### Foundation vs. Framework: Which namespace to use?
+
+**`CrudDatastore.Foundation`** is for datastores that already have full ORM and UnitOfWork capabilities:
+- Use when backing store provides change tracking, lazy-loading, and transaction management
+- Examples: Entity Framework 6.0 DbContext, other mature ORMs
+- Lighter abstraction layer over existing ORM features
+
+**Usage example:**
+```csharp
+using CrudDatastore.Foundation;
+
+// EF6 DbContext already provides ORM and UnitOfWork
+public class MyDataContext : DbContext, IUnitOfWorkSync
+{
+    public IDataQuery<Person> Read<T>() where T : EntityBase
+    {
+        return new DataQuery<T>(new DbSetQueryAdapter<T>(this));
+    }
+}
+```
+
+**`CrudDatastore.Framework`** provides ORM and UnitOfWork abstractions for basic datastores:
+- Use when backing store lacks change tracking and lazy-loading (e.g., in-memory lists, raw SQL)
+- Supplies UnitOfWorkBase with dynamic proxies, change tracking, entity materialization events
+- Enables navigation property lazy-loading via proxy interception
+- Allows in-memory testing via `InMemoryListExtensions`
+
+**Usage example:**
+```csharp
+using CrudDatastore.Framework;
+
+// Simple list-based datastore without native ORM
+public class InMemoryUnitOfWork : UnitOfWorkBase
+{
+    // Framework provides change tracking and lazy-loading via proxies
+    public IDataQuery<Person> Read<T>() where T : EntityBase
+    {
+        var list = new List<Person> { /* ... */ };
+        return new DataQuery<T>(new ListQueryAdapter<T>(list));
+    }
+}
+```
+
+**This sample** uses `CrudDatastore.Foundation` via `EFUnitOfWork` because EF6 DbContext already provides full ORM and change tracking.
 
 **Unit of work setup**
 
